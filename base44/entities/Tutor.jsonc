@@ -1,0 +1,62 @@
+{
+  "name": "Tutor",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "qualifications": {
+      "type": "string"
+    },
+    "experience": {
+      "type": "string",
+      "description": "Teaching experience"
+    },
+    "subjects": {
+      "type": "string",
+      "description": "Subjects taught"
+    },
+    "grades": {
+      "type": "string",
+      "description": "Grades taught"
+    },
+    "intro": {
+      "type": "string",
+      "description": "Short introduction"
+    },
+    "photoUrl": {
+      "type": "string"
+    },
+    "programSlugs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Program page slugs this tutor teaches"
+    },
+    "sortOrder": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
