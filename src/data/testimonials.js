@@ -1,8 +1,15 @@
 import Papa from "papaparse";
+import { base44 } from "@/api/base44Client";
 
 let testimonialsPromise;
 
 export async function getTestimonials() {
+  try {
+    const result = await base44.entities.Testimonial.list("sortOrder", 200);
+    if (result?.items?.length) return result.items.filter((item) => item.permissionGranted === true || String(item.permissionGranted).toLowerCase() === "true").map((item) => ({ ...item, isSample: false })).sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
+  } catch (error) {
+    console.info("Using published stories until the content service is available.", error);
+  }
   if (!testimonialsPromise) {
     testimonialsPromise = fetch("/data/testimonials.csv")
       .then((response) => {

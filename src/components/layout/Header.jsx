@@ -4,6 +4,7 @@ import { ChevronDown, Menu, X, Phone, BookOpen, GraduationCap, Trophy, Code2, Mi
 import Logo from "@/components/Logo";
 import { PROGRAMS } from "@/data/programs";
 import { SITE } from "@/data/site";
+import { useAuth } from "@/lib/AuthContext";
 
 const ICONS = { BookOpen, GraduationCap, Trophy, Code2, Mic, Wallet };
 const LINKS = [
@@ -20,6 +21,8 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [mega, setMega] = useState(false);
   const { pathname } = useLocation();
+  const { user } = useAuth();
+  const admin = user?.role === "admin";
   useEffect(() => { setOpen(false); setMega(false); }, [pathname]);
 
   return (
@@ -56,6 +59,7 @@ export default function Header() {
             )}
           </div>
           {LINKS.slice(1).map((l) => <NavLink key={l.to} to={l.to} className={linkCls}>{l.label}</NavLink>)}
+          {admin && <NavLink to="/admin/content" className={linkCls}>Admin</NavLink>}
         </div>
         <div className="hidden lg:block">
           <Link to="/contact#enquiry" className="inline-flex min-h-[44px] items-center rounded-full bg-brand-orange px-5 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition hover:bg-orange-600">Book a Free Assessment</Link>
@@ -70,6 +74,7 @@ export default function Header() {
           <p className="pt-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Programs</p>
           {PROGRAMS.map((p) => <Link key={p.slug} to={`/programs/${p.slug}`} className="block py-2.5 pl-3 text-sm">{p.title}</Link>)}
           {LINKS.slice(1).map((l) => <Link key={l.to} to={l.to} className="block py-3 font-medium">{l.label}</Link>)}
+          {admin && <Link to="/admin/content" className="block py-3 font-medium text-brand-orange">Admin</Link>}
           <Link to="/contact#enquiry" className="mt-3 block rounded-full bg-brand-orange py-3 text-center font-semibold text-white">Book a Free Assessment</Link>
         </div>
       )}

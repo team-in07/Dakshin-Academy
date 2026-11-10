@@ -14,11 +14,14 @@ import SuccessStories from "@/pages/SuccessStories";
 import Tutors from "@/pages/Tutors";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
+import AdminEnquiries from "@/pages/AdminEnquiries";
+import AdminContent from "@/pages/AdminContent";
+import { AuthProvider } from "@/lib/AuthContext";
 
 function App() {
   return (
     <QueryClientProvider client={queryClientInstance}>
-      <Router>
+      <AuthProvider><Router>
         <ScrollToTop />
         <Routes>
           <Route element={<SiteLayout />}>
@@ -29,10 +32,13 @@ function App() {
             <Route path="/tutors" element={<Tutors />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/admin/enquiries" element={<AdminEnquiries />} />
+            <Route path="/admin/content" element={<AdminContent />} />
           </Route>
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </Router>
+      </AuthProvider>
       <Toaster />
     </QueryClientProvider>
   );

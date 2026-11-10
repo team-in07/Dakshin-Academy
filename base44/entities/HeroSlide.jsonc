@@ -1,0 +1,20 @@
+{
+  "name": "HeroSlide",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "eyebrow": { "type": "string" },
+    "description": { "type": "string" },
+    "imageUrl": { "type": "string" },
+    "buttonText": { "type": "string" },
+    "buttonLink": { "type": "string" },
+    "sortOrder": { "type": "number", "default": 0 },
+    "isActive": { "type": "boolean", "default": true }
+  },
+  "required": ["title"],
+  "rls": {
+    "create": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}
