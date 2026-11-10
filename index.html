@@ -2,12 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="https://base44.com/logo_v2.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Dakshin Academy — personalised academic coaching, competition preparation and expert tutors."
+    />
+    <meta name="theme-color" content="#ffffff" />
     <link rel="manifest" href="/manifest.json" />
-    <title>Base44 APP</title>
+    <title>Dakshin Academy</title>
   </head>
   <body>
+    <form name="enquiry" method="POST" data-netlify="true" data-netlify-honeypot="website" hidden>
+      <input type="hidden" name="form-name" value="enquiry" />
+      <input name="parentName" />
+      <input name="studentName" />
+      <input name="grade" />
+      <input name="program" />
+      <input name="phone" />
+      <input name="email" />
+      <input name="preferredTiming" />
+      <textarea name="message"></textarea>
+      <input name="source" />
+      <input name="website" />
+    </form>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

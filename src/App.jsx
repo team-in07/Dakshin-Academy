@@ -1,80 +1,41 @@
-import { Toaster } from "@/components/ui/toaster"
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import ScrollToTop from './components/ScrollToTop';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import SiteLayout from '@/components/layout/SiteLayout';
-import Home from '@/pages/Home';
-import Programs from '@/pages/Programs';
-import ProgramDetail from '@/pages/ProgramDetail';
-import SuccessStories from '@/pages/SuccessStories';
-import Tutors from '@/pages/Tutors';
-import About from '@/pages/About';
-import Contact from '@/pages/Contact';
-import AdminEnquiries from '@/pages/AdminEnquiries';
-import Login from '@/pages/Login';
-import Register from '@/pages/Register';
-import ForgotPassword from '@/pages/ForgotPassword';
-import ResetPassword from '@/pages/ResetPassword';
-import Mfa from '@/pages/Mfa';
+import { Toaster } from "@/components/ui/toaster";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClientInstance } from "@/lib/query-client";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
+import PageNotFound from "./lib/PageNotFound";
+import ScrollToTop from "./components/ScrollToTop";
+import SiteLayout from "./components/layout/SiteLayout";
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (authError && authError.type === 'user_not_registered') {
-    return <UserNotRegisteredError />;
-  }
-
-  return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/mfa" element={<Mfa />} />
-      <Route element={<SiteLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/programs" element={<Programs />} />
-        <Route path="/programs/:slug" element={<ProgramDetail />} />
-        <Route path="/success-stories" element={<SuccessStories />} />
-        <Route path="/tutors" element={<Tutors />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-          <Route path="/admin/enquiries" element={<AdminEnquiries />} />
-        </Route>
-      </Route>
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
-  );
-};
-
+import Home from "@/pages/Home";
+import Programs from "@/pages/Programs";
+import ProgramDetail from "@/pages/ProgramDetail";
+import SuccessStories from "@/pages/SuccessStories";
+import Tutors from "@/pages/Tutors";
+import About from "@/pages/About";
+import Contact from "@/pages/Contact";
 
 function App() {
-
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <ScrollToTop />
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
-  )
+    <QueryClientProvider client={queryClientInstance}>
+      <Router>
+        <ScrollToTop />
+        <Routes>
+          <Route element={<SiteLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/programs" element={<Programs />} />
+            <Route path="/programs/:slug" element={<ProgramDetail />} />
+            <Route path="/success-stories" element={<SuccessStories />} />
+            <Route path="/tutors" element={<Tutors />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+          </Route>
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+      </Router>
+      <Toaster />
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;

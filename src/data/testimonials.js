@@ -1,4 +1,3 @@
-
 import Papa from "papaparse";
 
 let testimonialsPromise;
@@ -23,12 +22,15 @@ export async function getTestimonials() {
         }
 
         return result.data
-          .filter((item) => item.quote?.trim())
+          .filter(
+            (item) =>
+              item.permissionGranted?.trim().toLowerCase() === "true" &&
+              item.quote?.trim()
+          )
           .map((item) => ({
             ...item,
             sortOrder: Number(item.sortOrder) || 0,
-            isSample: item.is_sample?.toLowerCase() === "true",
-            displayAsSample: true,
+            isSample: item.is_sample?.trim().toLowerCase() === "true",
           }))
           .sort((a, b) => a.sortOrder - b.sortOrder);
       })
