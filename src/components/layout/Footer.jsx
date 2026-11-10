@@ -25,7 +25,6 @@ export default function Footer() {
             <li><Link className="hover:text-brand-orange" to="/tutors">Our Tutors</Link></li>
             <li><Link className="hover:text-brand-orange" to="/about">About Us</Link></li>
             <li><Link className="hover:text-brand-orange" to="/contact">Contact</Link></li>
-            <li><Link className="hover:text-brand-orange" to="/admin/enquiries">Admin</Link></li>
           </ul>
         </div>
         <div>

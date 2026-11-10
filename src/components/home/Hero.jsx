@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Pause, Play, Star, Users, Award, Video } from "lucide-react";
-import { base44 } from "@/api/base44Client";
 import CtaButtons from "@/components/CtaButtons";
 import { Image } from "@/components/ui/image";
 import { IMAGES } from "@/data/site";
@@ -58,15 +56,9 @@ export const DEFAULT_SLIDES = [
 ];
 
 export default function Hero() {
-  const { data } = useQuery({
-    queryKey: ["hero-slides"],
-    queryFn: async () => {
-      const result = await base44.entities.HeroSlide.list("sortOrder", 20);
-      return (result?.items || []).filter((slide) => slide.isActive !== false).sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
-    },
-    retry: false,
-  });
-  const slides = data?.length ? data : DEFAULT_SLIDES;
+    const slides = DEFAULT_SLIDES;
+
+
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   useEffect(() => setActive((current) => current % slides.length), [slides.length]);

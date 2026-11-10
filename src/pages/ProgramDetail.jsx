@@ -1,11 +1,11 @@
 
+
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Check, Users, User } from "lucide-react";
 
 import { getProgram } from "@/data/programs";
-import { base44 } from "@/api/base44Client";
 import { getTutors } from "@/data/tutor";
 import { getTestimonials } from "@/data/testimonials";
 
@@ -25,18 +25,7 @@ const H = ({ children }) => (
 
 export default function ProgramDetail() {
   const { slug } = useParams();
-  const fallbackProgram = getProgram(slug);
-  const { data: storedProgram } = useQuery({
-    queryKey: ["program-content", slug],
-    queryFn: async () => {
-      const result = await base44.entities.ProgramContent.list("slug", 100);
-      const item = (result?.items || []).find((entry) => entry.slug === slug);
-      return item ? JSON.parse(item.contentJson) : null;
-    },
-    enabled: !!fallbackProgram,
-    retry: false,
-  });
-  const p = storedProgram ? { ...fallbackProgram, ...storedProgram } : fallbackProgram;
+  const p = getProgram(slug);
 
   useEffect(() => {
     if (!p) return;

@@ -1,46 +1,78 @@
 
+
 import Papa from "papaparse";
-import { base44 } from "@/api/base44Client";
+import { supabase } from "@/lib/supabase";
 
 let tutorsPromise;
 
-export async function getTutors() {
-  try {
-    const result = await base44.entities.Tutor.list("sortOrder", 200);
-    if (result?.items?.length) return result.items.map((tutor) => ({ ...tutor, programSlugs: Array.isArray(tutor.programSlugs) ? tutor.programSlugs : JSON.parse(tutor.programSlugs || "[]") })).sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
-  } catch (error) {
-    console.info("Using published tutor profiles until the content service is available.", error);
+function normalizeTutor(tutor) {
+  let programSlugs =
+    tutor.programSlugs ?? tutor.program_slugs ?? [];
+
+  if (typeof programSlugs === "string") {
+    try {
+      programSlugs = JSON.parse(programSlugs || "[]");
+    } catch {
+      programSlugs = [];
+    }
   }
+
+  return {
+    ...tutor,
+    sortOrder: Number(tutor.sortOrder ?? tutor.sort_order ?? 0),
+    programSlugs: Array.isArray(programSlugs) ? programSlugs : [],
+  };
+}
+
+async function loadTutors() {
+  try {
+    const { data, error } = await supabase
+      .from("tutors")
+      .select("*")
+      .limit(200);
+
+    if (error) throw error;
+
+    if (data?.length) {
+      return data
+        .map(normalizeTutor)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+    }
+  } catch (error) {
+    console.info(
+      "Using published tutor profiles from CSV.",
+      error.message
+    );
+  }
+
+  const response = await fetch("/data/tutors.csv");
+
+  if (!response.ok) {
+    throw new Error("Unable to load tutors.csv");
+  }
+
+  const csv = await response.text();
+
+  const result = Papa.parse(csv, {
+    header: true,
+    skipEmptyLines: true,
+  });
+
+  if (result.errors.length) {
+    throw new Error("Error reading tutors CSV");
+  }
+
+  return result.data
+    .map(normalizeTutor)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+export async function getTutors() {
   if (!tutorsPromise) {
-    tutorsPromise = fetch("/data/tutors.csv")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Unable to load tutors.csv");
-        }
-        return response.text();
-      })
-      .then((csv) => {
-        const result = Papa.parse(csv, {
-          header: true,
-          skipEmptyLines: true,
-        });
-
-        if (result.errors.length) {
-          throw new Error("Error reading tutors CSV");
-        }
-
-        return result.data
-          .map((tutor) => ({
-            ...tutor,
-            sortOrder: Number(tutor.sortOrder) || 0,
-            programSlugs: JSON.parse(tutor.programSlugs || "[]"),
-          }))
-          .sort((a, b) => a.sortOrder - b.sortOrder);
-      })
-      .catch((error) => {
-        tutorsPromise = null;
-        throw error;
-      });
+    tutorsPromise = loadTutors().catch((error) => {
+      tutorsPromise = null;
+      throw error;
+    });
   }
 
   return tutorsPromise;

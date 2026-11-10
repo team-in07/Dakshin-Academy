@@ -9,13 +9,13 @@ export const SITE = {
 };
 
 export const IMAGES = {
-  hero: "https://media.base44.com/images/public/6aedf489cadaeb98ff97aab1/8841e76f3_generated_99a7e871.png",
-  tutor1: "https://media.base44.com/images/public/6aedf489cadaeb98ff97aab1/cfa1cbae6_generated_722e3ac1.png",
-  tutor2: "https://media.base44.com/images/public/6aedf489cadaeb98ff97aab1/5bb773cee_generated_3105c1b5.png",
-  tutor3: "https://media.base44.com/images/public/6aedf489cadaeb98ff97aab1/a5a993a1f_generated_c1f48e4a.png",
-  tutor4: "https://media.base44.com/images/public/6aedf489cadaeb98ff97aab1/596fc8382_generated_f7d2a5eb.png",
-  online: "https://media.base44.com/images/public/6aedf489cadaeb98ff97aab1/20b98a333_generated_74f37f67.png",
-  webinar: "https://media.base44.com/images/public/6aedf489cadaeb98ff97aab1/911f6c58f_generated_image.png",
+  hero: "/images/hero.png",
+  tutor1: "/images/tutor1.png",
+  tutor2: "/images/tutor2.png",
+  tutor3: "/images/tutor3.png",
+  tutor4: "/images/tutor4.png",
+  online: "/images/online.png",
+  webinar: "/images/webinar.jpg",
 };
 
 export const FAQS = [
