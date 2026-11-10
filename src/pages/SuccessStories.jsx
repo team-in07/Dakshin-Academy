@@ -1,7 +1,8 @@
 
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { getTestimonials } from "@/data/testimonials";
 import PageHero from "@/components/PageHero";
 import TestimonialCard from "@/components/TestimonialCard";
 import CtaBanner from "@/components/CtaBanner";
@@ -18,15 +19,16 @@ const TABS = [
 export default function SuccessStories() {
   const [tab, setTab] = useState("all");
 
-  // Use list(), which is already working on your homepage.
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["stories", "all"],
-    queryFn: () => base44.entities.Testimonial.list("sortOrder", 60),
+  const {
+    data: allItems = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["testimonials", "all"],
+    queryFn: getTestimonials,
   });
 
-  const allItems = data?.items ?? data ?? [];
-
-  // Filter categories locally instead of calling the failing filter API.
   const items =
     tab === "all"
       ? allItems
@@ -63,7 +65,7 @@ export default function SuccessStories() {
               Loading success stories...
             </p>
           ) : isError ? (
-            <p className="text-center text-red-600">
+            <p role="alert" className="text-center text-red-600">
               Unable to load success stories: {error?.message}
             </p>
           ) : items.length === 0 ? (
@@ -72,8 +74,11 @@ export default function SuccessStories() {
             </p>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {items.map((story) => (
-                <TestimonialCard key={story.id} t={story} />
+              {items.map((story, index) => (
+                <TestimonialCard
+                  key={story.id || `story-${index}`}
+                  t={story}
+                />
               ))}
             </div>
           )}
