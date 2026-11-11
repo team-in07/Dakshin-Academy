@@ -183,7 +183,7 @@ export default function Hero() {
           <Image
             src={slide.imageUrl || IMAGES.hero}
             alt={slide.imageAlt || "Students learning together with Dakshin Academy"}
-            className="aspect-square w-full rounded-[2rem] object-contain shadow-xl shadow-brand-green/10 lg:aspect-[16/10] lg:object-cover"
+            className="aspect-square w-full rounded-[1.5rem] object-contain shadow-xl shadow-brand-green/10 lg:rounded-[2rem] lg:aspect-[16/10] lg:object-cover"
           />
         </div>
       </div>
