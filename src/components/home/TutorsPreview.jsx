@@ -15,6 +15,7 @@ export default function TutorsPreview() {
     <section className="py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeading
+          cmsSlug="home-tutors-preview"
           eyebrow="Our tutors"
           title="Learn from experienced mentors"
           subtitle="Subject experts with strong academic backgrounds and a passion for teaching."

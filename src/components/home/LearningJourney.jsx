@@ -13,7 +13,7 @@ export default function LearningJourney() {
   return (
     <section className="bg-brand-cream py-24">
       <div className="mx-auto max-w-5xl px-6">
-        <SectionHeading eyebrow="How it works" title="A learning cycle that keeps students on track" />
+        <SectionHeading cmsSlug="home-learning-journey" eyebrow="How it works" title="A learning cycle that keeps students on track" />
         <div className="relative">
           <div className="absolute left-5 top-2 h-[calc(100%-1rem)] w-0.5 bg-gradient-to-b from-brand-orange to-brand-leaf md:left-1/2" />
           {STEPS.map((s, i) => (

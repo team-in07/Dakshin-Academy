@@ -13,7 +13,7 @@ export default function FaqSection() {
   return (
     <section className="bg-white py-24">
       <div className="mx-auto max-w-4xl px-6">
-        <SectionHeading eyebrow="FAQ" title="Frequently Asked Questions" subtitle="Answers to what parents ask us most." />
+        <SectionHeading cmsSlug="home-faq" eyebrow="FAQ" title="Frequently Asked Questions" subtitle="Answers to what parents ask us most." />
         {groups.map((g) => (
           <div key={g.group} className="mb-8">
             <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-brand-orange">{g.group}</h3>

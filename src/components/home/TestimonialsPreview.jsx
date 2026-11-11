@@ -15,6 +15,7 @@ export default function TestimonialsPreview() {
     <section className="bg-brand-cream py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeading
+          cmsSlug="home-testimonials-preview"
           eyebrow="Success stories"
           title="Families who trust Dakshin Academy"
         />

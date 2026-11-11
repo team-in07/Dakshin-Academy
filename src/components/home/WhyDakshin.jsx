@@ -15,7 +15,7 @@ export default function WhyDakshin() {
   return (
     <section className="bg-white py-24">
       <div className="mx-auto max-w-7xl px-6">
-        <SectionHeading eyebrow="Why Dakshin Academy" title="Learning built around the student" />
+        <SectionHeading cmsSlug="home-why-dakshin" eyebrow="Why Dakshin Academy" title="Learning built around the student" />
         <div className="grid gap-x-10 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
           {ITEMS.map((it, i) => (
             <motion.div key={it.t} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }} className="flex gap-4">

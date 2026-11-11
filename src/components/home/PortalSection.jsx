@@ -16,7 +16,7 @@ export default function PortalSection() {
     <section className="bg-brand-green py-24 text-white">
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2">
         <div>
-          <SectionHeading light center={false} eyebrow="Learning portal" title="A digital campus for students, parents and tutors" subtitle="Practice problems with explanations, homework after every session and a quiz before the next one — all in one secure place." />
+          <SectionHeading cmsSlug="home-learning-portal" light center={false} eyebrow="Learning portal" title="A digital campus for students, parents and tutors" subtitle="Practice problems with explanations, homework after every session and a quiz before the next one — all in one secure place." />
           <div className="mb-6 inline-flex rounded-full bg-white/10 p-1">
             {Object.keys(ROLES).map((r) => (
               <button key={r} onClick={() => setRole(r)} className={`min-h-[44px] rounded-full px-5 text-sm font-medium transition ${role === r ? "bg-brand-orange text-white" : "text-white/80"}`}>{r}</button>

@@ -17,7 +17,7 @@ export default function WebinarSection() {
           </div>
         </div>
         <div>
-          <SectionHeading center={false} eyebrow="Free live webinar" title="Applying Math to the Real World" subtitle="Discover how math powers innovation, entrepreneurship and real-world solutions — for high school students." />
+          <SectionHeading cmsSlug="home-webinar" center={false} eyebrow="Free live webinar" title="Applying Math to the Real World" subtitle="Discover how math powers innovation, entrepreneurship and real-world solutions — for high school students." />
           <div className="mb-4 flex items-center gap-3">
             <span className="rounded-md bg-brand-purple px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white">Speaker</span>
             <span className="text-sm font-semibold text-brand-ink">Prof. Dr. Padmanabhan Seshaiyer</span>
