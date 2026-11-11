@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ImagePlus, Plus, Save, Trash2, X } from "lucide-react";
-import { deleteCms, listCms, markCmsInitialized, saveCms, uploadWebsiteImage } from "@/data/cms";
+import { deleteCms, isCmsInitialized, listCms, markCmsInitialized, saveCms, uploadWebsiteImage } from "@/data/cms";
 import { PROGRAMS } from "@/data/programs";
 import { FAQS } from "@/data/site";
 import { DEFAULT_SLIDES } from "@/components/home/Hero";
