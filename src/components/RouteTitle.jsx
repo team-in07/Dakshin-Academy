@@ -1,6 +1,7 @@
 import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
-import { getProgram } from "@/data/programs";
+import { getProgramBySlug } from "@/data/programs";
 
 const PAGE_TITLES = {
   "/": "Home | Dakshin Academy",
@@ -14,7 +15,7 @@ const PAGE_TITLES = {
 export default function RouteTitle() {
   const { pathname } = useLocation();
   const slug = pathname.match(/^\/programs\/([^/]+)/)?.[1];
-  const program = slug ? getProgram(slug) : null;
+  const { data: program } = useQuery({ queryKey: ["program", slug], queryFn: () => getProgramBySlug(slug), enabled: !!slug });
   const title = program?.seoTitle || PAGE_TITLES[pathname] || "Dakshin Academy";
 
   useEffect(() => {

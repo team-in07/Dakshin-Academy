@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Check, Users, User } from "lucide-react";
 
-import { getProgram } from "@/data/programs";
+import { getProgramBySlug } from "@/data/programs";
 import { getTutors } from "@/data/tutor";
 import { getTestimonials } from "@/data/testimonials";
 
@@ -25,7 +25,7 @@ const H = ({ children }) => (
 
 export default function ProgramDetail() {
   const { slug } = useParams();
-  const p = getProgram(slug);
+  const { data: p, isLoading: programLoading } = useQuery({ queryKey: ["program", slug], queryFn: () => getProgramBySlug(slug) });
 
   useEffect(() => {
     if (!p) return;
@@ -53,6 +53,7 @@ export default function ProgramDetail() {
     enabled: !!p,
   });
 
+  if (programLoading) return <div className="mx-auto max-w-7xl px-6 py-24 text-center">Loading program…</div>;
   if (!p) return <PageNotFound />;
 
   const tutors = allTutors
@@ -74,11 +75,13 @@ export default function ProgramDetail() {
         title={p.title}
         subtitle={p.short}
       >
-        <CtaButtons dark />
+        <CtaButtons dark assessmentLabel={p.ctaText || "Book a Free Assessment"} assessmentHref={p.ctaLink || "/contact#enquiry"} />
       </PageHero>
 
       <div className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[1fr_380px]">
         <div className="space-y-14">
+
+          {p.imageUrl && <img src={p.imageUrl} alt={`${p.title} program`} className="max-h-[420px] w-full rounded-3xl object-cover" />}
 
           <section>
             <H>Who it is for</H>
@@ -144,6 +147,7 @@ export default function ProgramDetail() {
 
           <section>
             <H>Class format and schedule</H>
+            {p.fee && <p className="mb-4 rounded-xl bg-brand-cream p-4 text-sm"><strong>Program fee:</strong> {p.fee}</p>}
             <dl className="divide-y rounded-2xl bg-white shadow-sm">
               {p.format.map(([k, v]) => (
                 <div

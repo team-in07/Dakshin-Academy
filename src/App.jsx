@@ -24,11 +24,13 @@ import Contact from "@/pages/Contact";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminRoute from "@/components/AdminRoute";
+import RouteTitle from "@/components/RouteTitle";
 
 function App() {
   return (
     <QueryClientProvider client={queryClientInstance}>
       <Router>
+        <RouteTitle />
         <ScrollToTop />
 
         <Routes>

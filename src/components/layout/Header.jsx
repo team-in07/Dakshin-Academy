@@ -4,6 +4,9 @@ import { ChevronDown, Menu, X, Phone, BookOpen, GraduationCap, Trophy, Code2, Mi
 import Logo from "@/components/Logo";
 import { PROGRAMS } from "@/data/programs";
 import { SITE } from "@/data/site";
+import { useQuery } from "@tanstack/react-query";
+import { getPrograms } from "@/data/programs";
+import { getSiteSettings } from "@/data/cms";
 
 const ICONS = { BookOpen, GraduationCap, Trophy, Code2, Mic, Wallet };
 const LINKS = [
@@ -20,6 +23,10 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [mega, setMega] = useState(false);
   const { pathname } = useLocation();
+  const { data: programs = PROGRAMS } = useQuery({ queryKey: ["programs"], queryFn: getPrograms });
+  const { data: settings = {} } = useQuery({ queryKey: ["cms", "settings"], queryFn: getSiteSettings });
+  const phoneDisplay = settings.phoneDisplay || SITE.phoneDisplay;
+  const phoneHref = settings.phoneHref || SITE.phoneHref;
   useEffect(() => { setOpen(false); setMega(false); }, [pathname]);
 
   return (
@@ -27,7 +34,7 @@ export default function Header() {
       <div className="hidden bg-brand-green text-white md:block">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-1.5 text-xs">
           <span>Free assessment for new students — Grades K–12</span>
-          <a href={SITE.phoneHref} className="flex items-center gap-1.5 font-medium"><Phone className="h-3 w-3" />{SITE.phoneDisplay}</a>
+          <a href={phoneHref} className="flex items-center gap-1.5 font-medium"><Phone className="h-3 w-3" />{phoneDisplay}</a>
         </div>
       </div>
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3" aria-label="Main">
@@ -41,8 +48,8 @@ export default function Header() {
             {mega && (
               <div className="absolute left-1/2 top-full w-[640px] -translate-x-1/2 pt-3">
                 <div className="grid grid-cols-2 gap-1 rounded-2xl border border-slate-100 bg-white p-4 shadow-2xl shadow-slate-900/10">
-                  {PROGRAMS.map((p) => {
-                    const Icon = ICONS[p.icon];
+                  {programs.map((p) => {
+                    const Icon = ICONS[p.icon] || BookOpen;
                     return (
                       <Link key={p.slug} to={`/programs/${p.slug}`} className="group flex gap-3 rounded-xl p-3 transition hover:bg-brand-cream">
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-green/10 text-brand-green group-hover:bg-brand-orange group-hover:text-white"><Icon className="h-5 w-5" /></span>
@@ -68,7 +75,7 @@ export default function Header() {
         <div className="max-h-[80vh] overflow-y-auto border-t bg-white px-6 pb-6 lg:hidden">
           <Link to="/" className="block py-3 font-medium">Home</Link>
           <p className="pt-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Programs</p>
-          {PROGRAMS.map((p) => <Link key={p.slug} to={`/programs/${p.slug}`} className="block py-2.5 pl-3 text-sm">{p.title}</Link>)}
+          {programs.map((p) => <Link key={p.slug} to={`/programs/${p.slug}`} className="block py-2.5 pl-3 text-sm">{p.title}</Link>)}
           {LINKS.slice(1).map((l) => <Link key={l.to} to={l.to} className="block py-3 font-medium">{l.label}</Link>)}
           <Link to="/contact#enquiry" className="mt-3 block rounded-full bg-brand-orange py-3 text-center font-semibold text-white">Book a Free Assessment</Link>
         </div>

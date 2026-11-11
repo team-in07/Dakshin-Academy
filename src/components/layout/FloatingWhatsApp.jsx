@@ -1,10 +1,13 @@
 import { MessageCircle } from "lucide-react";
 import { SITE } from "@/data/site";
+import { useQuery } from "@tanstack/react-query";
+import { getSiteSettings } from "@/data/cms";
 
 export default function FloatingWhatsApp() {
+  const { data: settings = {} } = useQuery({ queryKey: ["cms", "settings"], queryFn: getSiteSettings });
   return (
     <a
-      href={SITE.whatsappHref}
+      href={settings.whatsappHref || SITE.whatsappHref}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"

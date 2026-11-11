@@ -3,8 +3,13 @@ import { Phone, Globe, MessageCircle } from "lucide-react";
 import Logo from "@/components/Logo";
 import { PROGRAMS } from "@/data/programs";
 import { SITE } from "@/data/site";
+import { useQuery } from "@tanstack/react-query";
+import { getPrograms } from "@/data/programs";
+import { getSiteSettings } from "@/data/cms";
 
 export default function Footer() {
+  const { data: programs = PROGRAMS } = useQuery({ queryKey: ["programs"], queryFn: getPrograms });
+  const { data: settings = {} } = useQuery({ queryKey: ["cms", "settings"], queryFn: getSiteSettings });
   return (
     <footer className="bg-brand-green text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-4">
@@ -15,7 +20,7 @@ export default function Footer() {
         <div>
           <h4 className="mb-4 font-semibold">Programs</h4>
           <ul className="space-y-2 text-sm text-white/75">
-            {PROGRAMS.map((p) => <li key={p.slug}><Link className="hover:text-brand-orange" to={`/programs/${p.slug}`}>{p.title}</Link></li>)}
+            {programs.map((p) => <li key={p.slug}><Link className="hover:text-brand-orange" to={`/programs/${p.slug}`}>{p.title}</Link></li>)}
           </ul>
         </div>
         <div>
@@ -30,9 +35,9 @@ export default function Footer() {
         <div>
           <h4 className="mb-4 font-semibold">Get in touch</h4>
           <ul className="space-y-3 text-sm text-white/80">
-            <li><a className="flex items-center gap-2 hover:text-brand-orange" href={SITE.phoneHref}><Phone className="h-4 w-4" />{SITE.phoneDisplay}</a></li>
-            <li><a className="flex items-center gap-2 hover:text-brand-orange" href={SITE.whatsappHref} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-4 w-4" />Chat on WhatsApp</a></li>
-            <li className="flex items-center gap-2"><Globe className="h-4 w-4" />{SITE.website}</li>
+            <li><a className="flex items-center gap-2 hover:text-brand-orange" href={settings.phoneHref || SITE.phoneHref}><Phone className="h-4 w-4" />{settings.phoneDisplay || SITE.phoneDisplay}</a></li>
+            <li><a className="flex items-center gap-2 hover:text-brand-orange" href={settings.whatsappHref || SITE.whatsappHref} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-4 w-4" />Chat on WhatsApp</a></li>
+            <li className="flex items-center gap-2"><Globe className="h-4 w-4" />{settings.website || SITE.website}</li>
           </ul>
           <Link to="/contact#enquiry" className="mt-5 inline-flex min-h-[44px] items-center rounded-full bg-brand-orange px-5 text-sm font-semibold">Book a Free Assessment</Link>
         </div>

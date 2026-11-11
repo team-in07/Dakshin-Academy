@@ -36,6 +36,7 @@ async function loadTutors() {
     const { data, error } = await supabase
       .from("tutors")
       .select("*")
+      .eq("is_published", true)
       .limit(200);
 
     if (error) throw error;

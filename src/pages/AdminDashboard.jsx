@@ -19,6 +19,8 @@ import {
   Inbox,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import AdminContentPanel from "@/components/admin/AdminContentPanel";
+import AdminEntityPanel from "@/components/admin/AdminEntityPanel";
 
 const STATUS_OPTIONS = [
   { value: "new", label: "New" },
@@ -69,6 +71,21 @@ export default function AdminDashboard() {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [activeTab, setActiveTab] = useState("enquiries");
+  const [notesDraft, setNotesDraft] = useState("");
+
+  const tabs = [
+    ["enquiries", "Enquiries"], ["program", "Programs"], ["hero_slide", "Hero announcements"],
+    ["section", "Website sections"], ["faq", "FAQs"], ["tutors", "Tutors"],
+    ["testimonials", "Testimonials"], ["setting", "Website settings"],
+  ];
+  function notify(message, isError = false) { setError(isError ? message : ""); setSuccess(isError ? "" : message); }
+  async function saveNotes() {
+    const { data, error: notesError } = await supabase.from("enquiries").update({ admin_notes: notesDraft }).eq("id", selectedEnquiry.id).select().maybeSingle();
+    if (notesError || !data) { notify(`Unable to save internal notes${notesError ? `: ${notesError.message}` : "."}`, true); return; }
+    setEnquiries((all) => all.map((item) => item.id === data.id ? { ...item, ...data } : item));
+    setSelectedEnquiry(data); notify("Internal notes saved.");
+  }
 
   // Load enquiries from Supabase
   const loadEnquiries = useCallback(async (showRefresh = false) => {
@@ -270,22 +287,24 @@ export default function AdminDashboard() {
 
       <main className="mx-auto max-w-7xl p-4 md:p-8">
 
+        <nav aria-label="Admin sections" className="mb-7 flex gap-2 overflow-x-auto pb-2">{tabs.map(([id, title]) => <button key={id} onClick={() => { setActiveTab(id); setError(""); setSuccess(""); }} className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${activeTab === id ? "bg-primary text-primary-foreground" : "border bg-card hover:bg-muted"}`}>{title}</button>)}</nav>
+
         {/* Dashboard heading */}
         <div className="mb-8">
           <div className="mb-2 flex items-center gap-2">
             <LayoutDashboard className="h-5 w-5 text-primary" />
 
             <span className="text-sm font-medium text-muted-foreground">
-              Admin Dashboard
+              Admin Dashboard · {tabs.find(([id]) => id === activeTab)?.[1]}
             </span>
           </div>
 
           <h2 className="text-3xl font-bold">
-            Enquiries Management
+            {activeTab === "enquiries" ? "Enquiries Management" : "Website Management"}
           </h2>
 
           <p className="mt-2 text-muted-foreground">
-            View and manage student enquiries submitted through your website.
+            {activeTab === "enquiries" ? "View and manage student enquiries submitted through your website." : "Manage the content clients see on the Dakshin Academy website."}
           </p>
         </div>
 
@@ -308,6 +327,11 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {activeTab !== "enquiries" && activeTab !== "tutors" && activeTab !== "testimonials" && <AdminContentPanel key={activeTab} type={activeTab} notify={notify} />}
+        {activeTab === "tutors" && <AdminEntityPanel table="tutors" notify={notify} />}
+        {activeTab === "testimonials" && <AdminEntityPanel table="testimonials" notify={notify} />}
+
+        {activeTab === "enquiries" && <>
         {/* Dashboard statistics */}
         <div className="mb-8 grid gap-4 sm:grid-cols-3">
 
@@ -543,7 +567,7 @@ export default function AdminDashboard() {
                         <div className="flex items-center gap-2">
 
                           <button
-                            onClick={() => setSelectedEnquiry(enquiry)}
+                            onClick={() => { setSelectedEnquiry(enquiry); setNotesDraft(enquiry.admin_notes || ""); }}
                             title="View enquiry"
                             aria-label="View enquiry"
                             className="rounded-lg border border-border p-2 hover:bg-muted"
@@ -579,6 +603,7 @@ export default function AdminDashboard() {
           )}
 
         </section>
+        </>}
       </main>
 
       {/* Enquiry details modal */}
@@ -673,7 +698,7 @@ export default function AdminDashboard() {
 
                 <p className="mt-1 flex items-center gap-2 font-medium">
                   <Phone className="h-4 w-4" />
-                  {selectedEnquiry.phone || "—"}
+                  {selectedEnquiry.phone ? <a href={`tel:${selectedEnquiry.phone}`}>{selectedEnquiry.phone}</a> : "—"}
                 </p>
               </div>
 
@@ -684,7 +709,7 @@ export default function AdminDashboard() {
 
                 <p className="mt-1 flex items-center gap-2 font-medium">
                   <Mail className="h-4 w-4" />
-                  {selectedEnquiry.email || "—"}
+                  {selectedEnquiry.email ? <a href={`mailto:${selectedEnquiry.email}`}>{selectedEnquiry.email}</a> : "—"}
                 </p>
               </div>
 
@@ -743,6 +768,12 @@ export default function AdminDashboard() {
                 {selectedEnquiry.message || "No additional message."}
               </p>
 
+            </div>
+
+            <div className="mt-6">
+              <label htmlFor="admin-notes" className="text-sm font-medium">Internal notes (visible only to admins)</label>
+              <textarea id="admin-notes" value={notesDraft} onChange={(event) => setNotesDraft(event.target.value)} rows={3} className="mt-2 w-full rounded-lg border border-border bg-background p-3 text-sm" placeholder="Add follow-up notes for the admin team" />
+              <button onClick={saveNotes} className="mt-2 rounded-lg border px-4 py-2 text-sm font-semibold">Save notes</button>
             </div>
 
             {/* Update status */}

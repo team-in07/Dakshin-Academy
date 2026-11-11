@@ -3,12 +3,15 @@ import PageHero from "@/components/PageHero";
 import EnquiryForm from "@/components/EnquiryForm";
 import FaqSection from "@/components/FaqSection";
 import { SITE } from "@/data/site";
+import { useQuery } from "@tanstack/react-query";
+import { getSiteSettings } from "@/data/cms";
 
 export default function Contact() {
+  const { data: settings = {} } = useQuery({ queryKey: ["cms", "settings"], queryFn: getSiteSettings });
   const rows = [
-    { icon: Phone, t: "Call us", v: SITE.phoneDisplay, href: SITE.phoneHref },
-    { icon: MessageCircle, t: "WhatsApp", v: "Chat on WhatsApp", href: SITE.whatsappHref },
-    { icon: Globe, t: "Website", v: SITE.website },
+    { icon: Phone, t: "Call us", v: settings.phoneDisplay || SITE.phoneDisplay, href: settings.phoneHref || SITE.phoneHref },
+    { icon: MessageCircle, t: "WhatsApp", v: "Chat on WhatsApp", href: settings.whatsappHref || SITE.whatsappHref },
+    { icon: Globe, t: "Website", v: settings.website || SITE.website },
   ];
   return (
     <>

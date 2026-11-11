@@ -9,6 +9,7 @@ export async function getTestimonials() {
       .from("testimonials")
       .select("*")
       .eq("permission_granted", true)
+      .eq("is_published", true)
       .order("sort_order", { ascending: true })
       .then(({ data, error }) => {
         if (error) {

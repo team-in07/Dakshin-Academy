@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Pause, Play, Star } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import { IMAGES } from "@/data/site";
+import { useQuery } from "@tanstack/react-query";
+import { isCmsInitialized, listCms } from "@/data/cms";
 
 export const DEFAULT_SLIDES = [
   {
@@ -29,7 +31,9 @@ export const DEFAULT_SLIDES = [
 ];
 
 export default function Hero() {
-  const slides = DEFAULT_SLIDES;
+  const { data: savedSlides = [] } = useQuery({ queryKey: ["cms", "hero_slide"], queryFn: () => listCms("hero_slide") });
+  const { data: cmsReady = false } = useQuery({ queryKey: ["cms", "initialized", "hero_slide"], queryFn: () => isCmsInitialized("hero_slide") });
+  const slides = cmsReady && savedSlides.length ? savedSlides : DEFAULT_SLIDES;
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   useEffect(() => setActive((current) => current % slides.length), [slides.length]);
@@ -56,7 +60,7 @@ export default function Hero() {
           </motion.div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/contact#enquiry" className="inline-flex min-h-12 items-center justify-center rounded-full bg-brand-orange px-6 text-sm font-semibold text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-600">Book a Free Assessment</Link>
+            {slide.ctaLink?.startsWith("http") ? <a href={slide.ctaLink} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center rounded-full bg-brand-orange px-6 text-sm font-semibold text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-600">{slide.ctaText || "Learn more"}</a> : <Link to={slide.ctaLink || "/contact#enquiry"} className="inline-flex min-h-12 items-center justify-center rounded-full bg-brand-orange px-6 text-sm font-semibold text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-600">{slide.ctaText || "Book a Free Assessment"}</Link>}
             <Link to="/programs" className="inline-flex min-h-12 items-center justify-center rounded-full border border-brand-green/30 bg-white/70 px-6 text-sm font-semibold text-brand-green transition hover:bg-white">View Programs</Link>
           </div>
 
@@ -72,7 +76,7 @@ export default function Hero() {
         </div>
 
         <div className="relative mx-auto w-full max-w-xl lg:ml-auto">
-          <Image src={IMAGES.hero} alt="Students learning together with Dakshin Academy" className="aspect-[5/4] w-full rounded-[2rem] object-cover shadow-xl shadow-brand-green/10 sm:aspect-[6/5] lg:aspect-[4/3]" />
+          <Image src={slide.imageUrl || IMAGES.hero} alt={slide.imageAlt || "Students learning together with Dakshin Academy"} className="aspect-[5/4] w-full rounded-[2rem] object-cover shadow-xl shadow-brand-green/10 sm:aspect-[6/5] lg:aspect-[4/3]" />
         </div>
       </div>
     </section>

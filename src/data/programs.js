@@ -92,4 +92,24 @@ export const PROGRAMS = [
   },
 ];
 
-export const getProgram = (slug) => PROGRAMS.find((p) => p.slug === slug);
+import { isCmsInitialized, listCms } from "@/data/cms";
+
+export async function getPrograms() {
+  try {
+    const saved = await listCms("program");
+    if (await isCmsInitialized("program")) return saved;
+    if (!saved.length) return PROGRAMS;
+    const bySlug = new Map(saved.map((p) => [p.slug, p]));
+    const merged = PROGRAMS.map((fallback) => ({ ...fallback, ...(bySlug.get(fallback.slug) || {}) }));
+    const existing = new Set(PROGRAMS.map((p) => p.slug));
+    return [...merged, ...saved.filter((p) => !existing.has(p.slug))];
+  } catch (error) {
+    console.info("Using built-in program content until CMS is available.", error.message);
+    return PROGRAMS;
+  }
+}
+
+export async function getProgramBySlug(slug) {
+  const programs = await getPrograms();
+  return programs.find((program) => program.slug === slug);
+}
