@@ -1,47 +1,37 @@
-import Papa from "papaparse";
+
+import { supabase } from "@/lib/supabase";
 
 let testimonialsPromise;
 
 export async function getTestimonials() {
   if (!testimonialsPromise) {
-    testimonialsPromise = fetch("/data/testimonials.csv")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Unable to load testimonials.csv");
-        }
-        return response.text();
-      })
-      .then((csv) => {
-        const result = Papa.parse(csv, {
-          header: true,
-          skipEmptyLines: true,
-        });
-
-        if (result.errors.length) {
-          throw new Error("Error reading testimonials CSV");
+    testimonialsPromise = supabase
+      .from("testimonials")
+      .select("*")
+      .eq("permission_granted", true)
+      .order("sort_order", { ascending: true })
+      .then(({ data, error }) => {
+        if (error) {
+          throw error;
         }
 
-        return result.data
-          .filter(
-            (item) =>
-              item.permissionGranted?.trim().toLowerCase() === "true" &&
-              item.quote?.trim()
-          )
+        return (data || [])
+          .filter((item) => item.quote?.trim())
           .map((item) => ({
             ...item,
             programSlug:
-              item.programSlug === "sat-ap-preparation"
+              item.program_slug === "sat-ap-preparation"
                 ? /\bAP\b/i.test(`${item.highlight || ""} ${item.quote || ""}`)
                   ? "ap-exam-preparation"
                   : "sat-preparation"
-                : item.programSlug,
-            sortOrder: Number(item.sortOrder) || 0,
-            isSample: item.is_sample?.trim().toLowerCase() === "true",
-          }))
-          .sort((a, b) => a.sortOrder - b.sortOrder);
+                : item.program_slug,
+            sortOrder: Number(item.sort_order) || 0,
+            isSample: item.is_sample === true,
+          }));
       })
       .catch((error) => {
         testimonialsPromise = null;
+        console.error("Unable to load testimonials:", error);
         throw error;
       });
   }

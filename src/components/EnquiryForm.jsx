@@ -1,9 +1,12 @@
+
+import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { PROGRAMS } from "@/data/programs";
 
 const GRADES = ["K", ...Array.from({ length: 12 }, (_, i) => String(i + 1))];
+
 const TIMINGS = [
   "Weekday mornings",
   "Weekday afternoons",
@@ -39,57 +42,80 @@ function getTimezone() {
 
 export default function EnquiryForm({ defaultProgram = "" }) {
   const { pathname } = useLocation();
-  const [f, setF] = useState(() => ({ ...EMPTY, program: defaultProgram, timezone: getTimezone() }));
+
+  const [f, setF] = useState(() => ({
+    ...EMPTY,
+    program: defaultProgram,
+    timezone: getTimezone(),
+  }));
+
   const [state, setState] = useState("idle");
   const [error, setError] = useState("");
-  const needsTimezone = Boolean(f.preferredTiming && f.preferredTiming !== "Flexible");
+
+  const needsTimezone = Boolean(
+    f.preferredTiming && f.preferredTiming !== "Flexible"
+  );
 
   const set = (key) => (e) =>
-    setF((previous) => ({ ...previous, [key]: e.target.value }));
+    setF((previous) => ({
+      ...previous,
+      [key]: e.target.value,
+    }));
 
+  // Submit enquiry to Supabase
   const submit = async (e) => {
     e.preventDefault();
 
-    if (f.website) return;
+    if (f.website || state === "sending") return;
 
     setState("sending");
     setError("");
 
-    const formData = new URLSearchParams({
-      "form-name": "enquiry",
-      ...f,
-      source: pathname === "/" ? "Home page" : pathname,
-    });
-
     try {
-      const response = await fetch("/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: formData.toString(),
-      });
+      const { error: submitError } = await supabase
+        .from("enquiries")
+        .insert([
+          {
+            parent_name: f.parentName.trim(),
+            student_name: f.studentName.trim() || null,
+            grade: f.grade,
+            program: f.program,
+            preferred_contact: f.preferredContact,
+            phone: f.phone.trim() || null,
+            email: f.email.trim() || null,
+            preferred_timing: f.preferredTiming || null,
+            timezone: needsTimezone ? f.timezone.trim() || null : null,
+            message: f.message.trim() || null,
+            source: pathname === "/" ? "Home page" : pathname,
+          },
+        ]);
 
-      if (!response.ok) {
-        throw new Error("Unable to submit your enquiry.");
+      if (submitError) {
+        throw submitError;
       }
 
       setState("done");
-    } catch {
+    } catch (err) {
+      console.error("Enquiry submission error:", err);
+
       setError(
         "Unable to submit your enquiry. Please try again or contact us on WhatsApp."
       );
+
       setState("idle");
     }
   };
 
+  // Success message
   if (state === "done") {
     return (
       <div className="rounded-3xl bg-white p-10 text-center shadow-xl">
         <CheckCircle2 className="mx-auto h-14 w-14 text-brand-leaf" />
+
         <h3 className="mt-4 text-2xl font-semibold text-brand-green">
           Thank you!
         </h3>
+
         <p className="mt-2 text-slate-600">
           We have received your enquiry and will contact you shortly to
           schedule your free assessment.
@@ -102,14 +128,11 @@ export default function EnquiryForm({ defaultProgram = "" }) {
     <form
       name="enquiry"
       method="POST"
-      data-netlify="true"
-      data-netlify-honeypot="website"
       onSubmit={submit}
       className="rounded-3xl bg-white p-6 shadow-xl md:p-8"
     >
-      <input type="hidden" name="form-name" value="enquiry" />
-
-      <p className="hidden">
+      {/* Honeypot field to discourage spam */}
+      <div className="hidden" aria-hidden="true">
         <label>
           Leave this field empty:
           <input
@@ -120,18 +143,21 @@ export default function EnquiryForm({ defaultProgram = "" }) {
             autoComplete="off"
           />
         </label>
-      </p>
+      </div>
 
       <h3 className="text-xl font-semibold text-brand-green">
         Book a Free Assessment
       </h3>
+
       <p className="mb-6 mt-1 text-sm text-slate-500">
         Share a few details and choose how you would like us to contact you.
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2">
+        {/* Parent name */}
         <label className="text-sm font-medium text-slate-700">
           Your name <span className="text-brand-orange">*</span>
+
           <input
             required
             name="parentName"
@@ -143,8 +169,11 @@ export default function EnquiryForm({ defaultProgram = "" }) {
           />
         </label>
 
+        {/* Student name */}
         <label className="text-sm font-medium text-slate-700">
-          Student name <span className="font-normal text-slate-400">(optional)</span>
+          Student name{" "}
+          <span className="font-normal text-slate-400">(optional)</span>
+
           <input
             name="studentName"
             placeholder="Student's name"
@@ -154,8 +183,10 @@ export default function EnquiryForm({ defaultProgram = "" }) {
           />
         </label>
 
+        {/* Grade */}
         <label className="text-sm font-medium text-slate-700">
           Student's grade <span className="text-brand-orange">*</span>
+
           <select
             required
             name="grade"
@@ -164,6 +195,7 @@ export default function EnquiryForm({ defaultProgram = "" }) {
             onChange={set("grade")}
           >
             <option value="">Select grade</option>
+
             {GRADES.map((g) => (
               <option key={g} value={g}>
                 {g === "K" ? "Kindergarten" : `Grade ${g}`}
@@ -172,8 +204,10 @@ export default function EnquiryForm({ defaultProgram = "" }) {
           </select>
         </label>
 
+        {/* Program */}
         <label className="text-sm font-medium text-slate-700">
           Course or program <span className="text-brand-orange">*</span>
+
           <select
             required
             name="program"
@@ -182,6 +216,7 @@ export default function EnquiryForm({ defaultProgram = "" }) {
             onChange={set("program")}
           >
             <option value="">Select a program</option>
+
             {PROGRAMS.map((p) => (
               <option key={p.slug} value={p.title}>
                 {p.title}
@@ -190,8 +225,11 @@ export default function EnquiryForm({ defaultProgram = "" }) {
           </select>
         </label>
 
+        {/* Preferred contact */}
         <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-          Preferred contact method <span className="text-brand-orange">*</span>
+          Preferred contact method{" "}
+          <span className="text-brand-orange">*</span>
+
           <select
             required
             name="preferredContact"
@@ -206,9 +244,15 @@ export default function EnquiryForm({ defaultProgram = "" }) {
           </select>
         </label>
 
-        {(f.preferredContact === "Phone" || f.preferredContact === "WhatsApp") && (
+        {/* Phone or WhatsApp */}
+        {(f.preferredContact === "Phone" ||
+          f.preferredContact === "WhatsApp") && (
           <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-            {f.preferredContact === "WhatsApp" ? "WhatsApp number" : "Phone number"} <span className="text-brand-orange">*</span>
+            {f.preferredContact === "WhatsApp"
+              ? "WhatsApp number"
+              : "Phone number"}{" "}
+            <span className="text-brand-orange">*</span>
+
             <input
               required
               name="phone"
@@ -222,9 +266,11 @@ export default function EnquiryForm({ defaultProgram = "" }) {
           </label>
         )}
 
+        {/* Email */}
         {f.preferredContact === "Email" && (
           <label className="text-sm font-medium text-slate-700 sm:col-span-2">
             Email address <span className="text-brand-orange">*</span>
+
             <input
               required
               name="email"
@@ -238,8 +284,11 @@ export default function EnquiryForm({ defaultProgram = "" }) {
           </label>
         )}
 
+        {/* Preferred timing */}
         <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-          Preferred class or assessment time <span className="font-normal text-slate-400">(optional)</span>
+          Preferred class or assessment time{" "}
+          <span className="font-normal text-slate-400">(optional)</span>
+
           <select
             name="preferredTiming"
             className={`${field} mt-1`}
@@ -247,6 +296,7 @@ export default function EnquiryForm({ defaultProgram = "" }) {
             onChange={set("preferredTiming")}
           >
             <option value="">Choose a time window</option>
+
             {TIMINGS.map((t) => (
               <option key={t} value={t}>
                 {t}
@@ -255,9 +305,11 @@ export default function EnquiryForm({ defaultProgram = "" }) {
           </select>
         </label>
 
+        {/* Timezone */}
         {needsTimezone && (
           <label className="text-sm font-medium text-slate-700 sm:col-span-2">
             Your timezone <span className="text-brand-orange">*</span>
+
             <input
               required
               name="timezone"
@@ -266,12 +318,18 @@ export default function EnquiryForm({ defaultProgram = "" }) {
               value={f.timezone}
               onChange={set("timezone")}
             />
-            <span className="mt-1 block font-normal text-slate-500">We detected your timezone; please check it before sending.</span>
+
+            <span className="mt-1 block font-normal text-slate-500">
+              We detected your timezone; please check it before sending.
+            </span>
           </label>
         )}
 
+        {/* Message */}
         <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-          Message <span className="font-normal text-slate-400">(optional)</span>
+          Message{" "}
+          <span className="font-normal text-slate-400">(optional)</span>
+
           <textarea
             name="message"
             rows={3}
@@ -281,12 +339,16 @@ export default function EnquiryForm({ defaultProgram = "" }) {
             onChange={set("message")}
           />
         </label>
-
-        <input type="hidden" name="source" value={pathname} />
       </div>
 
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      {/* Error message */}
+      {error && (
+        <p className="mt-4 text-sm text-red-600" role="alert">
+          {error}
+        </p>
+      )}
 
+      {/* Submit button */}
       <button
         type="submit"
         disabled={state === "sending"}
@@ -295,7 +357,10 @@ export default function EnquiryForm({ defaultProgram = "" }) {
         {state === "sending" && (
           <Loader2 className="h-4 w-4 animate-spin" />
         )}
-        Book a Free Assessment
+
+        {state === "sending"
+          ? "Submitting..."
+          : "Book a Free Assessment"}
       </button>
     </form>
   );
