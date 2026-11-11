@@ -1,5 +1,4 @@
 import Hero from "@/components/home/Hero";
-import ResultsStrip from "@/components/home/ResultsStrip";
 import ProgramsGrid from "@/components/home/ProgramsGrid";
 import WhyDakshin from "@/components/home/WhyDakshin";
 import LearningJourney from "@/components/home/LearningJourney";
@@ -14,7 +13,6 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <ResultsStrip />
       <ProgramsGrid />
       <WhyDakshin />
       <LearningJourney />

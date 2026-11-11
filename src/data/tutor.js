@@ -17,6 +17,13 @@ function normalizeTutor(tutor) {
     }
   }
 
+  if (Array.isArray(programSlugs) && programSlugs.includes("sat-ap-preparation")) {
+    const subjectList = String(tutor.subjects ?? "");
+    programSlugs = programSlugs.filter((slug) => slug !== "sat-ap-preparation");
+    if (/\bSAT\b/i.test(subjectList)) programSlugs.push("sat-preparation");
+    if (/\bAP\b/i.test(subjectList)) programSlugs.push("ap-exam-preparation");
+  }
+
   return {
     ...tutor,
     sortOrder: Number(tutor.sortOrder ?? tutor.sort_order ?? 0),

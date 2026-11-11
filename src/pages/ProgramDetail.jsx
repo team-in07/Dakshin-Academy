@@ -30,8 +30,6 @@ export default function ProgramDetail() {
   useEffect(() => {
     if (!p) return;
 
-    document.title = p.seoTitle;
-
     let m = document.querySelector('meta[name="description"]');
 
     if (!m) {

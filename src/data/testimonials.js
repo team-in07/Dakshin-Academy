@@ -29,6 +29,12 @@ export async function getTestimonials() {
           )
           .map((item) => ({
             ...item,
+            programSlug:
+              item.programSlug === "sat-ap-preparation"
+                ? /\bAP\b/i.test(`${item.highlight || ""} ${item.quote || ""}`)
+                  ? "ap-exam-preparation"
+                  : "sat-preparation"
+                : item.programSlug,
             sortOrder: Number(item.sortOrder) || 0,
             isSample: item.is_sample?.trim().toLowerCase() === "true",
           }))

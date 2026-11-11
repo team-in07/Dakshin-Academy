@@ -1,108 +1,80 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Pause, Play, Star, Users, Award, Video } from "lucide-react";
-import CtaButtons from "@/components/CtaButtons";
+import { ArrowLeft, ArrowRight, Pause, Play, Star } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import { IMAGES } from "@/data/site";
 
-const STATS = [
-  { icon: Users, label: "Small groups & 1-on-1" },
-  { icon: Video, label: "Live online classes" },
-  { icon: Award, label: "Competition mentors" },
-];
-
 export const DEFAULT_SLIDES = [
   {
-    eyebrow: "Start with a free assessment",
-    title: "Find the right learning path for your child.",
-    description: "We look at your child's strengths and goals, then recommend a level and program that fits.",
-    imageUrl: IMAGES.hero,
-    buttonText: "Book a Free Assessment",
-    buttonLink: "/contact#enquiry",
-    sortOrder: 1,
-    isActive: true,
+    eyebrow: "Free assessment for new students",
+    title: "A learning plan shaped around your child.",
+    description: "Start with an assessment of your child's strengths and goals, then find the right level and program.",
   },
   {
-    eyebrow: "Build strong school foundations",
-    title: "K–12 support in Math, ELA and Science.",
-    description: "Personalised tutoring helps students strengthen core skills, catch up with confidence, or move ahead.",
-    imageUrl: IMAGES.online,
-    buttonText: "Explore K–12 Tutoring",
-    buttonLink: "/programs/k12-math-ela-science",
-    sortOrder: 2,
-    isActive: true,
+    eyebrow: "K–12 Math, ELA and Science",
+    title: "Build strong foundations. Grow with confidence.",
+    description: "Personalised tutoring helps students strengthen core skills, close learning gaps, or move ahead.",
   },
   {
-    eyebrow: "Prepare for the next challenge",
-    title: "SAT, AP and academic competitions.",
-    description: "Get structured practice and expert guidance for SAT and AP exams, AMC, MathCounts, Science Olympiad and USABO.",
-    imageUrl: IMAGES.webinar,
-    buttonText: "View Exam Programs",
-    buttonLink: "/programs",
-    sortOrder: 3,
-    isActive: true,
+    eyebrow: "SAT, AP and academic competitions",
+    title: "Prepare for the next academic challenge.",
+    description: "Explore focused preparation for the SAT, AP courses, AMC, MathCounts, Science Olympiad and USABO.",
   },
   {
-    eyebrow: "Learn live with caring mentors",
-    title: "One-on-one or small-group classes, online.",
-    description: "Choose a learning format that fits your student, with live classes, regular feedback and a schedule that works for your family.",
-    imageUrl: IMAGES.tutor1,
-    buttonText: "Meet Our Tutors",
-    buttonLink: "/tutors",
-    sortOrder: 4,
-    isActive: true,
+    eyebrow: "Live online classes",
+    title: "One-on-one attention or small-group learning.",
+    description: "Choose a class format that suits your student, with caring tutors and a schedule that works for your family.",
   },
 ];
 
 export default function Hero() {
-    const slides = DEFAULT_SLIDES;
-
-
+  const slides = DEFAULT_SLIDES;
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   useEffect(() => setActive((current) => current % slides.length), [slides.length]);
   useEffect(() => {
     if (paused || slides.length < 2) return undefined;
-    const timer = window.setInterval(() => setActive((current) => (current + 1) % slides.length), 6500);
+    const timer = window.setInterval(() => setActive((current) => (current + 1) % slides.length), 7000);
     return () => window.clearInterval(timer);
   }, [paused, slides.length]);
 
   const slide = slides[active] || slides[0];
   const move = (direction) => setActive((current) => (current + direction + slides.length) % slides.length);
+
   return (
-    <section className="relative isolate overflow-hidden bg-brand-green text-white">
-      <div className="absolute inset-0 -z-10">
-        <img src={slide.imageUrl || IMAGES.hero} alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-green/95 via-brand-green/80 to-brand-green/35" />
-      </div>
-      <div className="mx-auto grid min-h-[620px] max-w-7xl items-center gap-10 px-6 py-16 lg:grid-cols-[1fr_360px] lg:py-24">
-        <motion.div key={active} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur"><Star className="h-3.5 w-3.5 fill-brand-orange text-brand-orange" /> {slide.eyebrow || "Dakshin Academy"}</span>
-          <h1 className="mt-6 max-w-3xl text-4xl font-bold leading-[1.1] tracking-tight md:text-6xl">{slide.title}</h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/85">{slide.description}</p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            {/^https?:\/\//i.test(slide.buttonLink || "") ? <a href={slide.buttonLink} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center rounded-full bg-brand-orange px-6 text-sm font-semibold text-white shadow-lg transition hover:bg-orange-600">{slide.buttonText || "Learn more"}</a> : <Link to={slide.buttonLink || "/contact#enquiry"} className="inline-flex min-h-12 items-center rounded-full bg-brand-orange px-6 text-sm font-semibold text-white shadow-lg transition hover:bg-orange-600">{slide.buttonText || "Learn more"}</Link>}
-            <CtaButtons dark showAssessment={false} />
+    <section className="overflow-hidden bg-brand-cream">
+      <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-12 md:py-16 lg:min-h-[570px] lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-20">
+        <div className="max-w-2xl">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-brand-green/15 bg-white/75 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-brand-green">
+            <Star className="h-3.5 w-3.5 fill-brand-orange text-brand-orange" /> Dakshin Academy
           </div>
-          <div className="mt-10 grid gap-4 border-t border-white/20 pt-6 sm:grid-cols-3">
-            {STATS.map((s) => <div key={s.label} className="flex items-center gap-2.5 text-sm font-medium"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15"><s.icon className="h-5 w-5" /></span>{s.label}</div>)}
+          <motion.div key={active} aria-live="polite" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+            <p className="text-sm font-semibold text-brand-orange">{slide.eyebrow}</p>
+            <h1 className="mt-3 max-w-xl text-4xl font-bold leading-[1.1] tracking-tight text-brand-green sm:text-5xl lg:text-6xl">{slide.title}</h1>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">{slide.description}</p>
+          </motion.div>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/contact#enquiry" className="inline-flex min-h-12 items-center justify-center rounded-full bg-brand-orange px-6 text-sm font-semibold text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-600">Book a Free Assessment</Link>
+            <Link to="/programs" className="inline-flex min-h-12 items-center justify-center rounded-full border border-brand-green/30 bg-white/70 px-6 text-sm font-semibold text-brand-green transition hover:bg-white">View Programs</Link>
           </div>
-        </motion.div>
-        <div className="hidden lg:block">
-          <div className="rounded-[2rem] border border-white/25 bg-white/10 p-5 shadow-2xl backdrop-blur-sm">
-            <Image src={slide.imageUrl || IMAGES.hero} alt="Students learning with Dakshin Academy" className="aspect-[4/5] w-full rounded-[1.5rem] object-cover" />
-            <div className="mt-4 flex items-center justify-between"><div><p className="text-xs text-white/70">Personalised learning</p><p className="font-semibold">Find the right path</p></div><div className="rounded-xl bg-brand-orange p-3"><Award className="h-6 w-6" /></div></div>
+
+          <div className="mt-8 flex items-center gap-3" aria-label="Announcement carousel controls">
+            <div className="flex items-center gap-1.5">
+              {slides.map((item, index) => <button key={item.eyebrow} onClick={() => setActive(index)} aria-label={`Show announcement ${index + 1}`} aria-current={index === active ? "true" : undefined} className={`h-2 rounded-full transition-all ${index === active ? "w-7 bg-brand-orange" : "w-2 bg-brand-green/25 hover:bg-brand-green/50"}`} />)}
+            </div>
+            <span className="text-xs tabular-nums text-slate-500">{active + 1} / {slides.length}</span>
+            <button onClick={() => move(-1)} aria-label="Previous announcement" className="rounded-full border border-brand-green/20 p-2 text-brand-green transition hover:bg-white"><ArrowLeft className="h-4 w-4" /></button>
+            <button onClick={() => move(1)} aria-label="Next announcement" className="rounded-full border border-brand-green/20 p-2 text-brand-green transition hover:bg-white"><ArrowRight className="h-4 w-4" /></button>
+            <button onClick={() => setPaused(!paused)} aria-label={paused ? "Play announcements" : "Pause announcements"} className="rounded-full border border-brand-green/20 p-2 text-brand-green transition hover:bg-white">{paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}</button>
           </div>
         </div>
+
+        <div className="relative mx-auto w-full max-w-xl lg:ml-auto">
+          <Image src={IMAGES.hero} alt="Students learning together with Dakshin Academy" className="aspect-[5/4] w-full rounded-[2rem] object-cover shadow-xl shadow-brand-green/10 sm:aspect-[6/5] lg:aspect-[4/3]" />
+        </div>
       </div>
-      {slides.length > 1 && <div className="absolute bottom-6 right-6 flex items-center gap-2 md:right-12">
-        <span className="mr-2 text-xs font-medium text-white/80">{active + 1} / {slides.length}</span>
-        <button onClick={() => move(-1)} aria-label="Previous slide" className="rounded-full border border-white/35 p-2 transition hover:bg-white/15"><ArrowLeft className="h-4 w-4" /></button>
-        <button onClick={() => move(1)} aria-label="Next slide" className="rounded-full border border-white/35 p-2 transition hover:bg-white/15"><ArrowRight className="h-4 w-4" /></button>
-        <button onClick={() => setPaused(!paused)} aria-label={paused ? "Play slides" : "Pause slides"} className="rounded-full border border-white/35 p-2 transition hover:bg-white/15">{paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}</button>
-      </div>}
-      {slides.length > 1 && <div className="absolute bottom-8 left-6 flex gap-2 md:left-12">{slides.map((item, index) => <button key={item.id || index} aria-label={`Go to slide ${index + 1}`} onClick={() => setActive(index)} className={`h-2 rounded-full transition-all ${index === active ? "w-8 bg-brand-orange" : "w-2 bg-white/60"}`} />)}</div>}
     </section>
   );
 }
