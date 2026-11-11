@@ -27,6 +27,7 @@ const STATUS_OPTIONS = [
   { value: "contacted", label: "Contacted" },
   { value: "in_progress", label: "In Progress" },
   { value: "enrolled", label: "Enrolled" },
+  { value: "converted", label: "Converted" },
   { value: "closed", label: "Closed" },
 ];
 
@@ -48,6 +49,7 @@ function getStatusClass(status) {
     contacted: "bg-yellow-100 text-yellow-700",
     in_progress: "bg-purple-100 text-purple-700",
     enrolled: "bg-green-100 text-green-700",
+    converted: "bg-green-100 text-green-700",
     closed: "bg-gray-100 text-gray-700",
   };
 
@@ -178,7 +180,8 @@ export default function AdminDashboard() {
       .maybeSingle();
 
     if (updateError) {
-      setError("Unable to update enquiry status. Please try again.");
+      const errorCode = updateError.code ? ` (${updateError.code})` : "";
+      setError(`Unable to update enquiry status: ${updateError.message}${errorCode}`);
     } else if (!data) {
       setError("Enquiry was not updated. Please check admin permissions.");
     } else {

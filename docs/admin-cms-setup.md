@@ -4,8 +4,9 @@
 
 1. In the Supabase project connected to this website, open **SQL Editor**.
 2. Run [`supabase/migrations/202611110001_dynamic_site_cms.sql`](../supabase/migrations/202611110001_dynamic_site_cms.sql) once as a database owner.
-3. Confirm the existing `admin_users` table contains exactly the two intended admin accounts. The migration does not add accounts or expose account details.
-4. Sign in at `/admin/login` with one of those accounts, then open `/admin`.
+3. Run [`supabase/migrations/202611110002_expand_enquiry_statuses.sql`](../supabase/migrations/202611110002_expand_enquiry_statuses.sql) once to allow the dashboard's enquiry workflow statuses while keeping the existing `converted` status.
+4. Confirm the existing `admin_users` table contains exactly the two intended admin accounts. The migrations do not add accounts or expose account details.
+5. Sign in at `/admin/login` with one of those accounts, then open `/admin`.
 
 The migration creates the CMS table and image bucket, and sets row-level policies so the public can read published website content and submit enquiries while only accounts already present in `admin_users` can manage website content, enquiries, tutors, testimonials, and uploaded images. The CMS does not contain a screen for granting admin access.
 
