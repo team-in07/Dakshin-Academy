@@ -48,9 +48,9 @@ export default function Hero() {
 
   return (
     <section className="relative isolate overflow-hidden bg-brand-cream">
-      <div className="absolute inset-0 lg:hidden" aria-hidden="true">
-        <img src={slide.imageUrl || IMAGES.hero} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-green/90 via-brand-green/85 to-brand-green/90" />
+      <div className="absolute inset-0 bg-brand-green lg:hidden" aria-hidden="true">
+        <img src={slide.imageUrl || IMAGES.hero} alt="" className="absolute inset-0 h-full w-full object-contain brightness-90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-green/90 via-brand-green/85 to-brand-green/95" />
       </div>
       <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 px-6 py-12 md:py-16 lg:min-h-[570px] lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-20">
         <div className="max-w-2xl">
