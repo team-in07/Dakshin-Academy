@@ -8,6 +8,7 @@ import TutorsPreview from "@/components/home/TutorsPreview";
 import TestimonialsPreview from "@/components/home/TestimonialsPreview";
 import FaqSection from "@/components/FaqSection";
 import HomeEnquiry from "@/components/home/HomeEnquiry";
+import AcademicOpportunities from "@/components/home/AcademicOpportunities";
 
 export default function Home() {
   return (
@@ -20,6 +21,7 @@ export default function Home() {
       <WebinarSection />
       <TutorsPreview />
       <TestimonialsPreview />
+      <AcademicOpportunities />
       <FaqSection />
       <HomeEnquiry />
     </>

@@ -1,34 +1,17 @@
-# AGENTS.md
+# Project notes
 
-## Project Context
+This is a user-owned React/Vite website. Preserve its existing branding and conventions and keep changes focused on the request.
 
-This is a Base44 app repository. Treat it as user-owned application code, keep changes focused on the user's request, and preserve existing project conventions.
+## Architecture
 
-Start with `README.md` for local setup, environment variables, and publish workflow.
+- `src/` contains the React application.
+- Supabase provides authentication, the database, and website media storage.
+- `supabase/migrations/` contains database policies and schema changes.
+- The frontend is a static Vite build; it does not depend on a proprietary app runtime.
+- Never expose or commit the Supabase service-role key. Browser code uses only the publishable key and relies on row-level security.
 
-## Base44 References
+## Commands
 
-- CLI overview: https://docs.base44.com/developers/references/cli/get-started/overview.md
-- Agent skills: https://docs.base44.com/developers/backend/overview/skills.md
-
-If your agent supports Agent Skills, install or update Base44 skills before Base44-specific work:
-
-```bash
-npx skills add base44/skills
-```
-
-## Key Files
-
-- `src/`: frontend application source.
-- `src/api/base44Client.js`: frontend Base44 SDK client.
-- `vite.config.js`: Vite config and Base44 Vite plugin setup.
-- `.env.local`: local-only environment values; never commit secrets.
-
-## Working Notes
-
-- Use `base44 dev` as the default local development command when you need the local Base44 backend. It can run the backend and frontend together.
-- When docs or code mention the frontend being started automatically, that usually means the Base44 project config includes `site.serveCommand`, for example `"serveCommand": "npm run dev"` in `base44/config.jsonc`.
-- Use `npm run dev` only for frontend-only work against the hosted Base44 backend.
-- Prefer the existing Base44 CLI workflow over adding new npm scripts for Base44-specific tasks.
-- Reuse the existing SDK client and Vite plugin patterns before adding new Base44 integration paths.
-- Run the relevant checks from `package.json` before finishing code changes.
+- `npm run dev` starts the local frontend.
+- `npm run build` creates the static site in `dist/`.
+- Deploy `dist/` to a static host configured with the two `VITE_SUPABASE_*` environment variables.

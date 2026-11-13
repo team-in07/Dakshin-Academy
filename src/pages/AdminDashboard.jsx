@@ -77,9 +77,10 @@ export default function AdminDashboard() {
   const [notesDraft, setNotesDraft] = useState("");
 
   const tabs = [
-    ["enquiries", "Enquiries"], ["program", "Programs"], ["hero_slide", "Hero announcements"],
+    ["enquiries", "Enquiries"], ["referrals", "Referrals"], ["program", "Programs"], ["hero_slide", "Hero announcements"],
     ["section", "Website sections"], ["faq", "FAQs"], ["tutors", "Tutors"],
-    ["testimonials", "Testimonials"], ["setting", "Website settings"],
+    ["testimonials", "Testimonials"], ["webinar", "Webinars"], ["batch", "Batches"],
+    ["video_testimonial", "Student videos"], ["review", "Reviews"], ["setting", "Website settings"],
   ];
   function notify(message, isError = false) { setError(isError ? message : ""); setSuccess(isError ? "" : message); }
   async function saveNotes() {
@@ -127,11 +128,18 @@ export default function AdminDashboard() {
     [enquiries]
   );
 
+  const activeEnquiries = useMemo(
+    () => activeTab === "referrals"
+      ? enquiries.filter((item) => item.source === "Refer and Earn")
+      : enquiries,
+    [enquiries, activeTab]
+  );
+
   // Search and filter enquiries
   const filteredEnquiries = useMemo(() => {
     const searchTerm = search.trim().toLowerCase();
 
-    return enquiries.filter((enquiry) => {
+    return activeEnquiries.filter((enquiry) => {
       const matchesSearch =
         !searchTerm ||
         [
@@ -141,6 +149,11 @@ export default function AdminDashboard() {
           enquiry.email,
           enquiry.program,
           enquiry.grade,
+          enquiry.source,
+          enquiry.message,
+          enquiry.friend_name,
+          enquiry.friend_phone,
+          enquiry.friend_email,
         ].some((value) =>
           String(value || "").toLowerCase().includes(searchTerm)
         );
@@ -155,14 +168,14 @@ export default function AdminDashboard() {
 
       return matchesSearch && matchesStatus && matchesProgram;
     });
-  }, [enquiries, search, statusFilter, programFilter]);
+  }, [activeEnquiries, search, statusFilter, programFilter]);
 
   // Dashboard statistics
-  const newCount = enquiries.filter(
+  const newCount = activeEnquiries.filter(
     (item) => (item.status || "new") === "new"
   ).length;
 
-  const contactedCount = enquiries.filter(
+  const contactedCount = activeEnquiries.filter(
     (item) => item.status === "contacted"
   ).length;
 
@@ -290,7 +303,7 @@ export default function AdminDashboard() {
 
       <main className="mx-auto max-w-7xl p-4 md:p-8">
 
-        <nav aria-label="Admin sections" className="mb-7 flex gap-2 overflow-x-auto pb-2">{tabs.map(([id, title]) => <button key={id} onClick={() => { setActiveTab(id); setError(""); setSuccess(""); }} className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${activeTab === id ? "bg-primary text-primary-foreground" : "border bg-card hover:bg-muted"}`}>{title}</button>)}</nav>
+        <nav aria-label="Admin sections" className="mb-7 flex gap-2 overflow-x-auto pb-2">{tabs.map(([id, title]) => <button key={id} onClick={() => { setActiveTab(id); setSearch(""); setStatusFilter("all"); setProgramFilter("all"); setError(""); setSuccess(""); }} className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${activeTab === id ? "bg-primary text-primary-foreground" : "border bg-card hover:bg-muted"}`}>{title}</button>)}</nav>
 
         {/* Dashboard heading */}
         <div className="mb-8">
@@ -303,11 +316,11 @@ export default function AdminDashboard() {
           </div>
 
           <h2 className="text-3xl font-bold">
-            {activeTab === "enquiries" ? "Enquiries Management" : "Website Management"}
+            {activeTab === "referrals" ? "Referral Management" : activeTab === "enquiries" ? "Enquiries Management" : "Website Management"}
           </h2>
 
           <p className="mt-2 text-muted-foreground">
-            {activeTab === "enquiries" ? "View and manage student enquiries submitted through your website." : "Manage the content clients see on the Dakshin Academy website."}
+            {activeTab === "referrals" ? "Review referrals, contact referred friends, and track follow-up status." : activeTab === "enquiries" ? "View and manage student enquiries submitted through your website." : "Manage the content clients see on the Dakshin Academy website."}
           </p>
         </div>
 
@@ -330,30 +343,30 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {activeTab !== "enquiries" && activeTab !== "tutors" && activeTab !== "testimonials" && <AdminContentPanel key={activeTab} type={activeTab} notify={notify} />}
+        {activeTab !== "enquiries" && activeTab !== "referrals" && activeTab !== "tutors" && activeTab !== "testimonials" && <AdminContentPanel key={activeTab} type={activeTab} notify={notify} />}
         {activeTab === "tutors" && <AdminEntityPanel table="tutors" notify={notify} />}
         {activeTab === "testimonials" && <AdminEntityPanel table="testimonials" notify={notify} />}
 
-        {activeTab === "enquiries" && <>
+        {(activeTab === "enquiries" || activeTab === "referrals") && <>
         {/* Dashboard statistics */}
         <div className="mb-8 grid gap-4 sm:grid-cols-3">
 
           <div className="rounded-xl border border-border bg-card p-5">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Total Enquiries
+                {activeTab === "referrals" ? "Total Referrals" : "Total Enquiries"}
               </p>
               <Users className="h-5 w-5 text-primary" />
             </div>
 
             <p className="mt-3 text-3xl font-bold">
-              {enquiries.length}
+              {activeEnquiries.length}
             </p>
           </div>
 
           <div className="rounded-xl border border-border bg-card p-5">
             <p className="text-sm text-muted-foreground">
-              New Enquiries
+                New {activeTab === "referrals" ? "Referrals" : "Enquiries"}
             </p>
 
             <p className="mt-3 text-3xl font-bold">
@@ -363,7 +376,7 @@ export default function AdminDashboard() {
 
           <div className="rounded-xl border border-border bg-card p-5">
             <p className="text-sm text-muted-foreground">
-              Contacted Enquiries
+                Contacted {activeTab === "referrals" ? "Referrals" : "Enquiries"}
             </p>
 
             <p className="mt-3 text-3xl font-bold">
@@ -381,7 +394,7 @@ export default function AdminDashboard() {
 
             <div>
               <h3 className="text-lg font-semibold">
-                Student Enquiries
+                {activeTab === "referrals" ? "Referral Submissions" : "Student Enquiries"}
               </h3>
 
               <p className="mt-1 text-sm text-muted-foreground">
@@ -416,7 +429,7 @@ export default function AdminDashboard() {
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search parent, student, phone, email or program..."
+                placeholder={activeTab === "referrals" ? "Search student, referred friend, phone or email..." : "Search parent, student, phone, email or program..."}
                 className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
@@ -467,7 +480,7 @@ export default function AdminDashboard() {
               <Inbox className="mb-3 h-10 w-10 text-muted-foreground" />
 
               <h4 className="font-semibold">
-                No enquiries found
+                No {activeTab === "referrals" ? "referrals" : "enquiries"} found
               </h4>
 
               <p className="mt-1 text-sm text-muted-foreground">
@@ -478,21 +491,23 @@ export default function AdminDashboard() {
           ) : (
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[850px] text-left text-sm">
+              <table className="w-full min-w-[980px] text-left text-sm">
 
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
-                    <th className="px-5 py-3 font-medium">
-                      Student / Parent
-                    </th>
+                    <th className="px-5 py-3 font-medium">{activeTab === "referrals" ? "Referring student" : "Student / Parent"}</th>
 
                     <th className="px-5 py-3 font-medium">
                       Program
                     </th>
 
+                    <th className="px-5 py-3 font-medium">Submission type</th>
+
                     <th className="px-5 py-3 font-medium">
                       Contact
                     </th>
+
+                    {activeTab === "referrals" && <th className="px-5 py-3 font-medium">Referred friend</th>}
 
                     <th className="px-5 py-3 font-medium">
                       Date
@@ -519,18 +534,14 @@ export default function AdminDashboard() {
                           {enquiry.student_name || "—"}
                         </p>
 
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Parent: {enquiry.parent_name || "—"}
-                        </p>
-
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Grade: {enquiry.grade || "—"}
-                        </p>
+                        {activeTab !== "referrals" && <><p className="mt-1 text-xs text-muted-foreground">Parent: {enquiry.parent_name || "—"}</p><p className="mt-1 text-xs text-muted-foreground">Grade: {enquiry.grade || "—"}</p></>}
                       </td>
 
                       <td className="px-5 py-4">
                         {enquiry.program || "—"}
                       </td>
+
+                      <td className="px-5 py-4">{enquiry.source || "Website enquiry"}</td>
 
                       <td className="px-5 py-4">
                         <p>{enquiry.phone || "—"}</p>
@@ -539,6 +550,8 @@ export default function AdminDashboard() {
                           {enquiry.email || ""}
                         </p>
                       </td>
+
+                      {activeTab === "referrals" && <td className="px-5 py-4"><p className="font-medium">{enquiry.friend_name || "—"}</p>{enquiry.friend_phone && <a href={`tel:${enquiry.friend_phone}`} className="mt-1 block text-xs text-muted-foreground">{enquiry.friend_phone}</a>}{enquiry.friend_email && <a href={`mailto:${enquiry.friend_email}`} className="mt-1 block text-xs text-muted-foreground">{enquiry.friend_email}</a>}</td>}
 
                       <td className="px-5 py-4 text-muted-foreground">
                         {formatDate(enquiry.created_at)}
@@ -758,6 +771,8 @@ export default function AdminDashboard() {
               </div>
 
             </div>
+
+            {selectedEnquiry.source === "Refer and Earn" && <div className="mt-6 rounded-xl border border-border bg-muted/30 p-4"><h4 className="font-semibold">Referred friend</h4><div className="mt-3 grid gap-3 sm:grid-cols-3"><div><p className="text-xs text-muted-foreground">Name</p><p className="mt-1 font-medium">{selectedEnquiry.friend_name || "—"}</p></div><div><p className="text-xs text-muted-foreground">Phone</p><p className="mt-1 font-medium">{selectedEnquiry.friend_phone ? <a href={`tel:${selectedEnquiry.friend_phone}`}>{selectedEnquiry.friend_phone}</a> : "—"}</p></div><div><p className="text-xs text-muted-foreground">Email</p><p className="mt-1 font-medium">{selectedEnquiry.friend_email ? <a href={`mailto:${selectedEnquiry.friend_email}`}>{selectedEnquiry.friend_email}</a> : "—"}</p></div></div></div>}
 
             {/* Additional message */}
             <div className="mt-6">

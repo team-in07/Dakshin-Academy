@@ -11,6 +11,9 @@ import { DEFAULT_SITE_SETTINGS } from "@/data/defaultSiteSettings";
 const TYPES = [
   ["program", "Programs"], ["hero_slide", "Hero announcements"], ["faq", "FAQs"],
   ["section", "Website sections"], ["setting", "Website settings"],
+  ["webinar", "Webinars"], ["batch", "Batches & curriculum"],
+  ["video_testimonial", "Video testimonials"], ["review", "Reviews"],
+  ["college", "College guidance options"],
 ];
 const FIELDS = {
   program: ["short", "seoTitle", "seoDesc", "audience", "topics", "benefits", "format", "tutorFocus", "fee", "imageUrl", "ctaText", "ctaLink"],
@@ -18,9 +21,14 @@ const FIELDS = {
   faq: ["group", "answer"],
   section: ["page", "eyebrow", "heading", "body", "imageUrl", "ctaText", "ctaLink"],
   setting: ["value"],
+  webinar: ["description", "speaker", "date", "time", "mode", "registrationUrl", "recordingUrl"],
+  batch: ["startDate", "duration", "schedule", "mode", "curriculum", "outcomes", "programSlug"],
+  video_testimonial: ["studentName", "program", "quote", "videoUrl", "thumbnailUrl", "permissionConfirmed"],
+  review: ["reviewer", "rating", "reviewText", "date", "platform", "reviewUrl"],
+  college: ["programmes", "eligibility", "applicationGuidance", "websiteUrl"],
 };
-const ARRAY_FIELDS = new Set(["topics", "benefits", "format", "tutorFocus"]);
-const LABELS = { seoDesc: "Search description", seoTitle: "Browser/search title", imageUrl: "Image URL", ctaLink: "Button link", ctaText: "Button text", tutorFocus: "Tutor subjects (comma separated)" };
+const ARRAY_FIELDS = new Set(["topics", "benefits", "format", "tutorFocus", "curriculum", "outcomes", "programmes"]);
+const LABELS = { seoDesc: "Search description", seoTitle: "Browser/search title", imageUrl: "Image URL", ctaLink: "Button link", ctaText: "Button text", tutorFocus: "Tutor subjects (comma separated)", videoUrl: "YouTube or uploaded video URL", reviewUrl: "Official review link", registrationUrl: "Registration link", enquiryUrl: "Enquiry link" };
 const blank = (type) => ({ type, slug: "", title: "", published: false, sort_order: 0, ...(type === "program" ? { topics: [], benefits: [], format: [], tutorFocus: [] } : {}) });
 
 export default function AdminContentPanel({ type, notify }) {
@@ -40,7 +48,7 @@ export default function AdminContentPanel({ type, notify }) {
       if (type === "faq") defaults = FAQS.flatMap((group, g) => group.items.map((item, i) => ({ type, id: null, slug: `faq-${g + 1}-${i + 1}`, title: item.q, answer: item.a, group: group.group, published: true, sort_order: g * 10 + i })));
       if (type === "section") defaults = DEFAULT_SITE_SECTIONS.map((item) => ({ ...item, type, id: null }));
       if (type === "setting") defaults = DEFAULT_SITE_SETTINGS.map((item) => ({ ...item, type, id: null }));
-      const managedTypes = ["program", "hero_slide", "faq", "section", "setting"];
+      const managedTypes = ["program", "hero_slide", "faq", "section", "setting", "webinar", "batch", "video_testimonial", "review", "college"];
       const wasInitialized = managedTypes.includes(type) ? await isCmsInitialized(type) : true;
       const existingSlugs = new Set(saved.map((item) => item.slug));
       const missingDefaults = defaults.filter((item) => !existingSlugs.has(item.slug));
@@ -50,7 +58,8 @@ export default function AdminContentPanel({ type, notify }) {
       }
       if (managedTypes.includes(type)) await markCmsInitialized(type);
       const bySlug = new Map(saved.map((item) => [item.slug, item]));
-      const rows = [...defaults.filter((item) => !wasInitialized || bySlug.has(item.slug)).map((item) => ({ ...item, ...(bySlug.get(item.slug) || {}) })), ...saved.filter((item) => !defaults.some((base) => base.slug === item.slug))];
+      const visibleDefaults = type === "setting" ? defaults : defaults.filter((item) => !wasInitialized || bySlug.has(item.slug));
+      const rows = [...visibleDefaults.map((item) => ({ ...item, ...(bySlug.get(item.slug) || {}) })), ...saved.filter((item) => !defaults.some((base) => base.slug === item.slug))];
       setItems(type === "setting" ? rows.filter((item) => !item.slug.startsWith("cms_initialized_")) : rows);
     }
     catch (error) { notify(`Could not load ${label.toLowerCase()}: ${error.message}`, true); }
@@ -73,6 +82,10 @@ export default function AdminContentPanel({ type, notify }) {
     next.title = String(form.get("title") || "").trim();
     next.sort_order = Number(form.get("sort_order")) || 0;
     next.published = editing.is_builtin || form.get("published") === "on";
+    if (type === "video_testimonial") {
+      next.permissionConfirmed = form.get("permissionConfirmed") === "on";
+      if (!next.permissionConfirmed) next.published = false;
+    }
     try { await saveCms(type, next); setEditing(null); await queryClient.invalidateQueries({ queryKey: ["cms"] }); await queryClient.invalidateQueries({ queryKey: ["programs"] }); await queryClient.invalidateQueries({ queryKey: ["program"] }); await refresh(); notify(`${label} saved.`); }
     catch (error) { notify(`Could not save ${label.toLowerCase()}: ${error.message}`, true); }
     finally { setBusy(false); }
@@ -100,7 +113,8 @@ export default function AdminContentPanel({ type, notify }) {
     <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5"><div><h3 className="text-lg font-semibold">{label}</h3><p className="mt-1 text-sm text-muted-foreground">{type === "section" ? "Edit existing homepage headings and descriptions, or add a custom section for any page." : type === "setting" ? "Update the phone, WhatsApp, and website details displayed on the public site." : "Add, edit, publish, or remove items shown on the public website."}</p></div><button onClick={() => setEditing(blank(type))} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"><Plus className="h-4 w-4"/> Add {label.replace(/s$/, "")}</button></div>
     {items.length === 0 ? <p className="p-8 text-sm text-muted-foreground">No saved items yet. The website continues to use its built-in content until you publish a CMS item.</p> : <div className="divide-y">{items.map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 p-4"><div><p className="font-semibold">{item.title}</p><p className="text-xs text-muted-foreground">/{item.slug} · {item.published ? "Published" : "Draft"}</p></div><div className="flex gap-2"><button onClick={() => setEditing({ ...blank(type), ...item })} className="rounded-lg border px-3 py-2 text-sm">Edit</button><button onClick={() => remove(item)} aria-label={item.is_builtin ? `Reset ${item.title}` : `Delete ${item.title}`} className="rounded-lg border p-2 text-red-600"><Trash2 className="h-4 w-4"/></button></div></div>)}</div>}
     {editing && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3" onClick={() => setEditing(null)}><form onSubmit={submit} onClick={(event) => event.stopPropagation()} className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-card p-5 shadow-xl sm:p-7"><div className="mb-5 flex justify-between"><div><h4 className="text-xl font-bold">{editing.id ? "Edit" : "Add"} {label.replace(/s$/, "")}</h4><p className="text-sm text-muted-foreground">Content changes appear on the public website after publishing.</p></div><button type="button" onClick={() => setEditing(null)} aria-label="Close"><X className="h-5 w-5"/></button></div>
-      <div className="grid gap-4 sm:grid-cols-2"><Field name="title" label="Title" value={editing.title}/><Field name="slug" label="Page/section key (URL slug)" value={editing.slug} disabled={editing.is_builtin}/>{fields.map((field) => <Field key={field} name={field} label={LABELS[field] || field.replace(/[A-Z]/g, (x) => ` ${x}`).replace(/^./, (x) => x.toUpperCase())} value={textValue(field, editing[field])} wide={ARRAY_FIELDS.has(field) || ["description", "short", "seoDesc", "audience", "answer", "body", "value"].includes(field)} multiline={ARRAY_FIELDS.has(field) || ["description", "short", "seoDesc", "audience", "answer", "body", "value"].includes(field)}/>)}</div>
+      <div className="grid gap-4 sm:grid-cols-2"><Field name="title" label="Title" value={editing.title}/><Field name="slug" label="Page/section key (URL slug)" value={editing.slug} disabled={editing.is_builtin}/>{fields.filter((field) => !(type === "video_testimonial" && field === "permissionConfirmed")).map((field) => <Field key={field} name={field} label={LABELS[field] || field.replace(/[A-Z]/g, (x) => ` ${x}`).replace(/^./, (x) => x.toUpperCase())} value={textValue(field, editing[field])} wide={ARRAY_FIELDS.has(field) || ["description", "short", "seoDesc", "audience", "answer", "body", "value", "reviewText", "quote", "eligibility", "applicationGuidance"].includes(field)} multiline={ARRAY_FIELDS.has(field) || ["description", "short", "seoDesc", "audience", "answer", "body", "value", "reviewText", "quote", "eligibility", "applicationGuidance"].includes(field)}/>)}</div>
+      {type === "video_testimonial" && <label className="mt-4 flex items-start gap-2 text-sm"><input type="checkbox" name="permissionConfirmed" defaultChecked={editing.permissionConfirmed === true} className="mt-1"/>I confirm the student or parent has given permission to publish this video and testimonial.</label>}
       {fields.includes("imageUrl") && <div className="mt-4"><label className="text-sm font-medium">Upload an image (up to 8 MB)</label><div className="mt-2 flex items-center gap-3"><label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm"><ImagePlus className="h-4 w-4"/> Choose image<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="sr-only" onChange={upload}/></label>{editing.imageUrl && <img src={editing.imageUrl} alt="Selected" className="h-12 w-16 rounded object-cover"/>}</div></div>}
       <div className="mt-5 grid gap-4 sm:grid-cols-2"><Field name="sort_order" label="Display order" type="number" value={editing.sort_order || 0}/><label className="flex items-center gap-2 text-sm"><input type="checkbox" name="published" defaultChecked={editing.published} disabled={editing.is_builtin}/> Published on website {editing.is_builtin && <span className="text-xs text-muted-foreground">(existing section)</span>}</label></div>
       <div className="mt-6 flex justify-end"><button disabled={busy} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 font-semibold text-primary-foreground disabled:opacity-50"><Save className="h-4 w-4"/>{busy ? "Saving…" : "Save changes"}</button></div></form></div>}

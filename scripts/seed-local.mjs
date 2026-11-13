@@ -1,5 +1,6 @@
 
 import { readFile } from "node:fs/promises";
+import { createClient } from "@supabase/supabase-js";
 
 // Reads a CSV file, including quoted fields and commas inside quotes.
 function parseCSV(text) {
@@ -64,11 +65,6 @@ function parseCSV(text) {
     );
 }
 
-function asRows(result) {
-  if (Array.isArray(result)) return result;
-  return result?.items ?? result?.data ?? [];
-}
-
 function parseNumber(value, fieldName) {
   const number = Number(value || 0);
 
@@ -81,7 +77,7 @@ function parseNumber(value, fieldName) {
 
 async function readCSV(filename) {
   const text = await readFile(
-    new URL(`../${filename}`, import.meta.url),
+    new URL(`../public/data/${filename}`, import.meta.url),
     "utf8"
   );
 
@@ -137,45 +133,43 @@ const testimonials = testimonialCSV.map((row) => ({
   sortOrder: parseNumber(row.sortOrder, "testimonials.csv sortOrder"),
 }));
 
-// Import tutors without creating duplicates.
-const existingTutors = asRows(
-  await base44.entities.Tutor.list("sortOrder", 100)
-);
+const url = process.env.VITE_SUPABASE_URL;
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!url || !serviceKey) {
+  throw new Error("Set VITE_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY before running this import.");
+}
+const supabase = createClient(url, serviceKey, { auth: { persistSession: false } });
 
-let tutorsAdded = 0;
-
-for (const tutor of tutors) {
-  if (existingTutors.some((row) => row.name === tutor.name)) {
-    continue;
-  }
-
-  await base44.entities.Tutor.create(tutor);
-  tutorsAdded++;
+const { data: existingTutors, error: tutorReadError } = await supabase.from("tutors").select("name");
+if (tutorReadError) throw tutorReadError;
+const tutorNames = new Set((existingTutors || []).map((row) => row.name));
+const tutorRows = tutors.filter((row) => !tutorNames.has(row.name)).map((row) => ({ ...row, is_published: true }));
+if (tutorRows.length) {
+  const { error } = await supabase.from("tutors").insert(tutorRows);
+  if (error) throw error;
 }
 
-// Import testimonials without creating duplicates.
-const existingStories = asRows(
-  await base44.entities.Testimonial.list("sortOrder", 100)
-);
-
-let storiesAdded = 0;
-
-for (const story of testimonials) {
-  if (
-    existingStories.some(
-      (row) => row.quote === story.quote && row.author === story.author
-    )
-  ) {
-    continue;
-  }
-
-  await base44.entities.Testimonial.create(story);
-  storiesAdded++;
+const { data: existingStories, error: storyReadError } = await supabase.from("testimonials").select("author,quote");
+if (storyReadError) throw storyReadError;
+const storyKeys = new Set((existingStories || []).map((row) => `${row.author}\n${row.quote}`));
+const storyRows = testimonials
+  .filter((row) => !storyKeys.has(`${row.author}\n${row.quote}`))
+  .map((row) => ({
+    category: row.category,
+    quote: row.quote,
+    author: row.author,
+    detail: row.detail,
+    highlight: row.highlight,
+    program_slug: row.programSlug,
+    permission_granted: row.permissionGranted,
+    sort_order: row.sortOrder,
+    is_published: false,
+  }));
+if (storyRows.length) {
+  const { error } = await supabase.from("testimonials").insert(storyRows);
+  if (error) throw error;
 }
 
-console.log("Local CSV import complete!");
-console.log(`Tutors in CSV: ${tutors.length}`);
-console.log(`Tutors added: ${tutorsAdded}`);
-console.log(`Testimonials in CSV: ${testimonials.length}`);
-console.log(`Testimonials added: ${storiesAdded}`);
-console.log("Existing records were skipped to avoid duplicates.");
+console.log("Supabase CSV import complete.");
+console.log(`Tutors added: ${tutorRows.length}`);
+console.log(`Testimonial records added as drafts: ${storyRows.length}`);

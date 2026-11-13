@@ -15,6 +15,7 @@ const LINKS = [
   { to: "/tutors", label: "Our Tutors" },
   { to: "/about", label: "About Us" },
   { to: "/contact", label: "Contact" },
+  { to: "/#refer", label: "Refer & Earn" },
 ];
 const linkCls = ({ isActive }) =>
   `rounded-full px-3.5 py-2 text-sm font-medium transition ${isActive ? "text-brand-orange" : "text-brand-ink hover:text-brand-green"}`;
