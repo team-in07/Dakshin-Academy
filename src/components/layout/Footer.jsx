@@ -14,9 +14,19 @@ export default function Footer() {
     <footer className="bg-brand-green text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-4">
         <div>
-          <Logo light />
-          <p className="mt-5 text-sm leading-relaxed text-white/75">Empowering tomorrow's innovators through expert tutoring, competition coaching and real-world learning.</p>
-        </div>
+  <div className="inline-flex items-center justify-center rounded-xl bg-white p-3">
+    <img
+      src="/images/dakshin-academy-logo.png"
+      alt="Dakshin Academy"
+      className="h-20 w-auto object-contain"
+    />
+  </div>
+
+  <p className="mt-5 text-sm leading-relaxed text-white/75">
+    Empowering tomorrow's innovators through expert tutoring, competition
+    coaching and real-world learning.
+  </p>
+</div>
         <div>
           <h4 className="mb-4 font-semibold">Programs</h4>
           <ul className="space-y-2 text-sm text-white/75">
