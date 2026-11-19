@@ -122,14 +122,14 @@ export async function markCmsInitialized(type) {
   });
 }
 
-// Upload website images to Supabase Storage
-// Supports hero images, tutor photos and other website images.
+// Upload images to Supabase Storage
+// Automatically generates a unique filename and public URL.
 export async function uploadWebsiteImage(file, folder = "website") {
   if (!file) {
     throw new Error("Please select an image.");
   }
 
-  // Validate image format
+  // Supported image formats
   const allowedTypes = [
     "image/jpeg",
     "image/png",
@@ -138,17 +138,15 @@ export async function uploadWebsiteImage(file, folder = "website") {
   ];
 
   if (!allowedTypes.includes(file.type)) {
-    throw new Error(
-      "Only JPG, PNG, WebP and GIF images are allowed."
-    );
+    throw new Error("Only JPG, PNG, WebP and GIF images are allowed.");
   }
 
-  // Validate image size (8 MB maximum)
+  // Maximum file size: 8 MB
   if (file.size > 8 * 1024 * 1024) {
     throw new Error("Image must be smaller than 8 MB.");
   }
 
-  // Validate folder name
+  // Allowed Storage folders
   const allowedFolders = ["hero", "tutors", "website"];
 
   if (!allowedFolders.includes(folder)) {
@@ -158,26 +156,29 @@ export async function uploadWebsiteImage(file, folder = "website") {
   // Generate a unique filename for every upload
   const extension = file.name.split(".").pop().toLowerCase();
   const uniqueId = crypto.randomUUID();
-  const fileName = `${Date.now()}-${uniqueId}.${extension}`;
 
-  // Create unique Storage path
+  const fileName = `${Date.now()}-${uniqueId}.${extension}`;
   const filePath = `${folder}/${fileName}`;
 
-  // Upload image to Supabase Storage
+  // Upload to Supabase Storage
   const { data, error } = await supabase.storage
     .from("website-media")
     .upload(filePath, file, {
-      cacheControl: "0",
+      cacheControl: "3600",
       contentType: file.type,
       upsert: false,
     });
 
   if (error) {
     console.error("Supabase image upload error:", error);
-    throw error;
+    throw new Error(`Image upload failed: ${error.message}`);
   }
 
-  // Generate public image URL
+  if (!data?.path) {
+    throw new Error("Image uploaded but file path was not returned.");
+  }
+
+  // Automatically generate public URL
   const { data: publicData } = supabase.storage
     .from("website-media")
     .getPublicUrl(data.path);
@@ -186,13 +187,13 @@ export async function uploadWebsiteImage(file, folder = "website") {
     throw new Error("Could not generate public image URL.");
   }
 
-  // Add a unique query parameter to prevent browser cache issues
+  // Unique URL prevents old browser image cache from being reused
   const imageUrl = `${publicData.publicUrl}?v=${uniqueId}`;
 
   console.log("Image uploaded successfully:", {
     folder,
-    filePath: data.path,
-    imageUrl,
+    path: data.path,
+    publicUrl: imageUrl,
   });
 
   return imageUrl;
