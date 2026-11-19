@@ -103,7 +103,7 @@ export default function AdminContentPanel({ type, notify }) {
   async function upload(event) {
     const file = event.target.files?.[0]; if (!file) return;
     setBusy(true);
-    try { const imageUrl = await uploadWebsiteImage(file); setEditing((value) => ({ ...value, imageUrl })); }
+    try { const imageUrl = await uploadWebsiteImage(file, "hero"); setEditing((value) => ({ ...value, imageUrl })); }
     catch (error) { notify(`Image upload failed: ${error.message}`, true); }
     finally { setBusy(false); event.target.value = ""; }
   }
@@ -113,7 +113,41 @@ export default function AdminContentPanel({ type, notify }) {
     <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5"><div><h3 className="text-lg font-semibold">{label}</h3><p className="mt-1 text-sm text-muted-foreground">{type === "section" ? "Edit existing homepage headings and descriptions, or add a custom section for any page." : type === "setting" ? "Update the phone, WhatsApp, and website details displayed on the public site." : "Add, edit, publish, or remove items shown on the public website."}</p></div><button onClick={() => setEditing(blank(type))} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"><Plus className="h-4 w-4"/> Add {label.replace(/s$/, "")}</button></div>
     {items.length === 0 ? <p className="p-8 text-sm text-muted-foreground">No saved items yet. The website continues to use its built-in content until you publish a CMS item.</p> : <div className="divide-y">{items.map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 p-4"><div><p className="font-semibold">{item.title}</p><p className="text-xs text-muted-foreground">/{item.slug} · {item.published ? "Published" : "Draft"}</p></div><div className="flex gap-2"><button onClick={() => setEditing({ ...blank(type), ...item })} className="rounded-lg border px-3 py-2 text-sm">Edit</button><button onClick={() => remove(item)} aria-label={item.is_builtin ? `Reset ${item.title}` : `Delete ${item.title}`} className="rounded-lg border p-2 text-red-600"><Trash2 className="h-4 w-4"/></button></div></div>)}</div>}
     {editing && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3" onClick={() => setEditing(null)}><form onSubmit={submit} onClick={(event) => event.stopPropagation()} className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-card p-5 shadow-xl sm:p-7"><div className="mb-5 flex justify-between"><div><h4 className="text-xl font-bold">{editing.id ? "Edit" : "Add"} {label.replace(/s$/, "")}</h4><p className="text-sm text-muted-foreground">Content changes appear on the public website after publishing.</p></div><button type="button" onClick={() => setEditing(null)} aria-label="Close"><X className="h-5 w-5"/></button></div>
-      <div className="grid gap-4 sm:grid-cols-2"><Field name="title" label="Title" value={editing.title}/><Field name="slug" label="Page/section key (URL slug)" value={editing.slug} disabled={editing.is_builtin}/>{fields.filter((field) => !(type === "video_testimonial" && field === "permissionConfirmed")).map((field) => <Field key={field} name={field} label={LABELS[field] || field.replace(/[A-Z]/g, (x) => ` ${x}`).replace(/^./, (x) => x.toUpperCase())} value={textValue(field, editing[field])} wide={ARRAY_FIELDS.has(field) || ["description", "short", "seoDesc", "audience", "answer", "body", "value", "reviewText", "quote", "eligibility", "applicationGuidance"].includes(field)} multiline={ARRAY_FIELDS.has(field) || ["description", "short", "seoDesc", "audience", "answer", "body", "value", "reviewText", "quote", "eligibility", "applicationGuidance"].includes(field)}/>)}</div>
+
+<div className="grid gap-4 sm:grid-cols-2">
+  <Field name="title" label="Title" value={editing.title} />
+  <Field
+    name="slug"
+    label="Page/section key (URL slug)"
+    value={editing.slug}
+    disabled={editing.is_builtin}
+  />
+
+  {fields
+    .filter(
+      (field) =>
+        !(type === "video_testimonial" && field === "permissionConfirmed")
+    )
+    .map((field) => (
+      <Field
+        key={`${field}-${field === "imageUrl" ? editing.imageUrl || "" : ""}`}
+        name={field}
+        label={
+          LABELS[field] ||
+          field.replace(/[A-Z]/g, (x) => ` ${x}`).replace(/^./, (x) => x.toUpperCase())
+        }
+        value={textValue(field, editing[field])}
+        wide={
+          ARRAY_FIELDS.has(field) ||
+          ["description", "short", "seoDesc", "audience", "answer", "body", "value", "reviewText", "quote", "eligibility", "applicationGuidance"].includes(field)
+        }
+        multiline={
+          ARRAY_FIELDS.has(field) ||
+          ["description", "short", "seoDesc", "audience", "answer", "body", "value", "reviewText", "quote", "eligibility", "applicationGuidance"].includes(field)
+        }
+      />
+    ))}
+</div>
       {type === "video_testimonial" && <label className="mt-4 flex items-start gap-2 text-sm"><input type="checkbox" name="permissionConfirmed" defaultChecked={editing.permissionConfirmed === true} className="mt-1"/>I confirm the student or parent has given permission to publish this video and testimonial.</label>}
       {fields.includes("imageUrl") && <div className="mt-4"><label className="text-sm font-medium">Upload an image (up to 8 MB)</label><div className="mt-2 flex items-center gap-3"><label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm"><ImagePlus className="h-4 w-4"/> Choose image<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="sr-only" onChange={upload}/></label>{editing.imageUrl && <img src={editing.imageUrl} alt="Selected" className="h-12 w-16 rounded object-cover"/>}</div></div>}
       <div className="mt-5 grid gap-4 sm:grid-cols-2"><Field name="sort_order" label="Display order" type="number" value={editing.sort_order || 0}/><label className="flex items-center gap-2 text-sm"><input type="checkbox" name="published" defaultChecked={editing.published} disabled={editing.is_builtin}/> Published on website {editing.is_builtin && <span className="text-xs text-muted-foreground">(existing section)</span>}</label></div>

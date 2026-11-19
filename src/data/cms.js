@@ -32,8 +32,14 @@ export async function saveCms(type, item) {
     title,
     published = true,
     sort_order = 0,
-    ...content
+    content: existingContent,
+    ...contentFields
   } = item;
+
+  const cleanContent = {
+    ...(existingContent || {}),
+    ...contentFields,
+  };
 
   const payload = {
     type,
@@ -41,16 +47,24 @@ export async function saveCms(type, item) {
     title: title || "Untitled",
     published,
     sort_order: Number(sort_order) || 0,
-    content,
+    content: cleanContent,
   };
 
   const query = id
-    ? supabase.from("cms_content").update(payload).eq("id", id)
-    : supabase.from("cms_content").insert(payload);
+    ? supabase
+        .from("cms_content")
+        .update(payload)
+        .eq("id", id)
+    : supabase
+        .from("cms_content")
+        .insert(payload);
 
   const { data, error } = await query.select("*").single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("CMS save error:", error);
+    throw error;
+  }
 
   return {
     ...data,
@@ -109,57 +123,77 @@ export async function markCmsInitialized(type) {
 }
 
 // Upload website images to Supabase Storage
-export async function uploadWebsiteImage(file) {
+// Supports hero images, tutor photos and other website images.
+export async function uploadWebsiteImage(file, folder = "website") {
   if (!file) {
     throw new Error("Please select an image.");
   }
 
+  // Validate image format
   const allowedTypes = [
     "image/jpeg",
     "image/png",
     "image/webp",
+    "image/gif",
   ];
 
   if (!allowedTypes.includes(file.type)) {
-    throw new Error("Only JPG, PNG and WebP images are allowed.");
+    throw new Error(
+      "Only JPG, PNG, WebP and GIF images are allowed."
+    );
   }
 
+  // Validate image size (8 MB maximum)
   if (file.size > 8 * 1024 * 1024) {
     throw new Error("Image must be smaller than 8 MB.");
   }
 
-  const fileExtension = file.name.split(".").pop().toLowerCase();
+  // Validate folder name
+  const allowedFolders = ["hero", "tutors", "website"];
 
-  const fileName = `${crypto.randomUUID()}.${fileExtension}`;
+  if (!allowedFolders.includes(folder)) {
+    throw new Error("Invalid image upload folder.");
+  }
 
-  const filePath = `tutors/${Date.now()}-${fileName}`;
+  // Generate a unique filename for every upload
+  const extension = file.name.split(".").pop().toLowerCase();
+  const uniqueId = crypto.randomUUID();
+  const fileName = `${Date.now()}-${uniqueId}.${extension}`;
+
+  // Create unique Storage path
+  const filePath = `${folder}/${fileName}`;
 
   // Upload image to Supabase Storage
   const { data, error } = await supabase.storage
     .from("website-media")
     .upload(filePath, file, {
-      cacheControl: "3600",
+      cacheControl: "0",
       contentType: file.type,
       upsert: false,
     });
 
   if (error) {
-    console.error("Supabase upload error:", error);
+    console.error("Supabase image upload error:", error);
     throw error;
   }
 
-  // Get public image URL
+  // Generate public image URL
   const { data: publicData } = supabase.storage
     .from("website-media")
     .getPublicUrl(data.path);
 
-  const imageUrl = publicData?.publicUrl;
-
-  if (!imageUrl) {
+  if (!publicData?.publicUrl) {
     throw new Error("Could not generate public image URL.");
   }
 
-  console.log("Image uploaded successfully:", imageUrl);
+  // Add a unique query parameter to prevent browser cache issues
+  const imageUrl = `${publicData.publicUrl}?v=${uniqueId}`;
+
+  console.log("Image uploaded successfully:", {
+    folder,
+    filePath: data.path,
+    imageUrl,
+  });
 
   return imageUrl;
 }

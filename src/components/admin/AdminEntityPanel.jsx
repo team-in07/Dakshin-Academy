@@ -236,7 +236,7 @@ export default function AdminEntityPanel({ table, notify }) {
 
     try {
       // Upload image to Supabase Storage.
-      const uploadedUrl = await uploadWebsiteImage(file);
+      const uploadedUrl = await uploadWebsiteImage(file, "tutors");
 
       if (
         typeof uploadedUrl !== "string" ||
