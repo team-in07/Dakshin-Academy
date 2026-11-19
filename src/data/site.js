@@ -9,7 +9,7 @@ export const SITE = {
 };
 
 export const IMAGES = {
-  hero: "/images/hero.png",
+  hero: "/images/science-students.png",
   tutor1: "/images/tutor1.png",
   tutor2: "/images/tutor2.png",
   tutor3: "/images/tutor3.png",
