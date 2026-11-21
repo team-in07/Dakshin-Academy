@@ -41,12 +41,19 @@ export default function Tutors() {
             </p>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {items.map((tutor, index) => (
-                <TutorCard
-                  key={tutor.id || `tutor-${index}`}
-                  tutor={tutor}
-                />
-              ))}
+              {items.map((tutor, index) => {
+                const isFeaturedTutor =
+                  tutor.name?.toLowerCase().includes("padmanabhan") ||
+                  tutor.name?.toLowerCase().includes("padhu");
+
+                return (
+                  <TutorCard
+                    key={tutor.id || `tutor-${index}`}
+                    tutor={tutor}
+                    isFeaturedTutor={isFeaturedTutor}
+                  />
+                );
+              })}
             </div>
           )}
         </div>

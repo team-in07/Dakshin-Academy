@@ -17,6 +17,7 @@ import Programs from "@/pages/Programs";
 import ProgramDetail from "@/pages/ProgramDetail";
 import SuccessStories from "@/pages/SuccessStories";
 import Tutors from "@/pages/Tutors";
+import FeaturedTutorProfile from "@/pages/FeaturedTutorProfile";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 
@@ -47,6 +48,13 @@ function App() {
               element={<SuccessStories />}
             />
             <Route path="/tutors" element={<Tutors />} />
+
+            {/* Featured tutor profile - only one dedicated profile */}
+            <Route
+              path="/tutors/featured-tutor"
+              element={<FeaturedTutorProfile />}
+            />
+
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
           </Route>
