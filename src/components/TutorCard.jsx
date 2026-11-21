@@ -51,7 +51,7 @@ export default function TutorCard({ tutor, isFeaturedTutor = false }) {
               to="/tutors/featured-tutor"
               className="inline-flex w-full items-center justify-center rounded-xl bg-brand-green px-5 py-3 font-semibold text-white transition hover:bg-brand-green/90"
             >
-              About Me
+              Learn More
             </Link>
           </div>
         )}
