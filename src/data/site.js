@@ -15,7 +15,7 @@ export const IMAGES = {
   tutor3: "/images/tutor3.png",
   tutor4: "/images/tutor4.png",
   online: "/images/online.png",
-  webinar: "/images/webinar.jpg",
+  webinar: "https://ajgiwmjjkhqruwgsjukn.supabase.co/storage/v1/object/public/website-media/1794765899111-51a4c95a-c6a7-4067-b61d-0806b9ae4329-Applying-Math-Padu-Poster.jpg",
 };
 
 export const FAQS = [
